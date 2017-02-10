@@ -4,7 +4,8 @@
   "description": "A co-op music sequencer",
   "main": "client/main.js",
   "scripts": {
-    "start": "electron client/main.js"
+    "start": "electron client/main.js",
+    "server": "electron server/main.js"
   },
   "repository": "https://github.com/LucianBuzzo/beeperfleet",
   "keywords": [
