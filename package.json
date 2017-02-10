@@ -1,0 +1,22 @@
+{
+  "name": "beeperfleet",
+  "version": "1.0.0",
+  "description": "A co-op music sequencer",
+  "main": "client/main.js",
+  "scripts": {
+    "start": "electron client/main.js"
+  },
+  "repository": "https://github.com/LucianBuzzo/beeperfleet",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  }
+}
