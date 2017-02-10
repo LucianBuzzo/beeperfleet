@@ -13,12 +13,13 @@ console.log(synth)
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
 
-const BPM = 160
+const BPM = 140
 const NOTE_LENGTH = 100
 
 const ADD_SEQUENCE = 'ADD_SEQUENCE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
 const REMOVE_SEQUENCE = 'REMOVE_SEQUENCE'
+const UPDATE_SEQUENCE_MIDI = 'UPDATE_SEQUENCE_MIDI'
 
 let currentStep = 0
 
@@ -39,7 +40,12 @@ const reducer = (state, action) => {
       return state.setIn(['sequences', id], sequence)
     case UPDATE_SEQUENCE:
       return state.updateIn(['sequences', action.id], (seq) => {
-        seq[action.tile] = action.value
+        seq[action.tile].active = action.value
+        return seq
+      })
+    case UPDATE_SEQUENCE_MIDI:
+      return state.updateIn(['sequences', action.id], (seq) => {
+        seq[action.tile].midiNumber = action.value
         return seq
       })
     case REMOVE_SEQUENCE:
@@ -76,6 +82,16 @@ io.on('connection', (socket) => {
     })
   })
 
+  socket.on('sequenceMidiUpdate', (data) => {
+    console.log(data)
+    store.dispatch({
+      type: UPDATE_SEQUENCE_MIDI,
+      id: data.id,
+      tile: data.tile,
+      value: data.value
+    })
+  })
+
   socket.on('disconnect', () => {
     store.dispatch({
       type: REMOVE_SEQUENCE,
@@ -92,11 +108,12 @@ const tick = () => {
   io.sockets.emit('heartbeat', currentStep)
   let sequences = store.getState().get('sequences').toArray()
   sequences.forEach(seq => {
-    if (seq[currentStep] === 1) {
-      console.log('beep')
-      synth.noteOn(60, 0.75)
+    if (seq[currentStep].active) {
+      // Add the zero to create a new variable instead of a reference
+      let midiNumber = seq[currentStep].midiNumber + 0
+      synth.noteOn(midiNumber, 0.75)
 
-      setTimeout(() => synth.noteOff(60), NOTE_LENGTH)
+      setTimeout(() => synth.noteOff(midiNumber), NOTE_LENGTH)
     }
   })
 
@@ -108,4 +125,5 @@ const tick = () => {
 
 setInterval(() => {
   tick()
-}, 60000 / BPM)
+}, 60000 / (BPM * 4))
+
