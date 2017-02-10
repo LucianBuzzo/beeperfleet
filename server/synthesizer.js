@@ -115,7 +115,6 @@ class Synthesizer {
   }
 
   noteOn(note, velocity) {
-    console.log("note on: " + note)
     if (!this.voices[note]) {
       // Create a new synth node
       this.voices[note] = new Voice(note, velocity, this)
@@ -246,7 +245,6 @@ class Synthesizer {
 
   onUpdateFilterCutoff(ev) {
     var value = ev.currentTarget ? ev.currentTarget.value : ev
-    //	console.log("currentFilterCutoff= " + currentFilterCutoff + "new cutoff= " + value)
     this.currentFilterCutoff = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -430,7 +428,6 @@ class Synthesizer {
     if (note) {
       this.noteOn(note + 12 * (3 - this.currentOctave), 0.75)
     }
-    console.log('key down: ' + ev.keyCode)
 
     return false
   }
@@ -497,7 +494,6 @@ class Synthesizer {
         if (this.revNode) {
           this.revNode.buffer = buffer
         } else {
-          console.log('no revNode ready!')
         }
       })
     }
