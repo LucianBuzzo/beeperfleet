@@ -1,5 +1,3 @@
-'use babel'
-
 const socket = require('socket.io-client')('http://localhost:8080')
 const uuidV4 = require('uuid/v4')
 const clientUUID = uuidV4()
@@ -18,7 +16,43 @@ socket.on('connect', () => {
   })
 })
 
+class Tile extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { active: 0 }
+    this.toggle = this.toggle.bind(this);
+  }
+
+  render() {
+    return (
+      <button onClick={this.toggle} className="tile">
+      {this.state.active ? 'ON' : 'OFF'}
+      </button>
+    )
+  }
+
+  toggle() {
+    this.setState(prevState => ({
+      active: !prevState.active
+    }));
+  }
+}
+
+class Grid extends React.Component {
+  renderTile(i) {
+    return <Tile />;
+  }
+  render() {
+    const tiles = sequence.map((item, index) =>
+      <Tile key={index} />
+    )
+    return (
+      <div className="grid">{tiles}</div>
+    );
+  }
+}
+
 ReactDOM.render(
-  <h1>Hello, world!</h1>,
+  <Grid />,
   document.getElementById('root')
 )

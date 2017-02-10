@@ -1,0 +1,12 @@
+.grid {
+  margin: 100px auto;
+  width: 280px;
+  height: 280px;
+}
+
+.tile {
+  width: 60px;
+  height: 60px;
+  margin: 5px;
+  float: left;
+}
