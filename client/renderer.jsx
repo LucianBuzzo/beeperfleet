@@ -4,13 +4,14 @@ const clientUUID = uuidV4()
 const React = require('react')
 const ReactDOM = require('react-dom')
 
+// TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
 
 const sequence = [...Array(SEQUENCE_LENGTH)].map(() => 0)
 
 socket.on('connect', () => {
   console.log('connected')
-  socket.emit('clientSequence', {
+  socket.emit('sequence', {
     id: clientUUID,
     sequence
   })
@@ -32,23 +33,30 @@ class Tile extends React.Component {
   }
 
   toggle() {
-    this.setState(prevState => ({
-      active: !prevState.active
-    }));
+    let active = this.state.active ? 0 : 1
+    this.setState(() => ({ active }))
+    console.log(active)
+    console.log(this.props.sequenceNum)
+    sequence[this.props.sequenceNum] = active
+    socket.emit('sequenceUpdate', {
+      id: clientUUID,
+      tile: this.props.sequenceNum,
+      value: active
+    })
   }
 }
 
 class Grid extends React.Component {
   renderTile(i) {
-    return <Tile />;
+    return <Tile />
   }
   render() {
     const tiles = sequence.map((item, index) =>
-      <Tile key={index} />
+      <Tile sequenceNum={index} key={index} />
     )
     return (
       <div className="grid">{tiles}</div>
-    );
+    )
   }
 }
 
