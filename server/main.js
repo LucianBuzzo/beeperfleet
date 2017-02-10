@@ -1,5 +1,5 @@
 const electron = require('electron')
-const { app, BrowserWindow, ipcMain } = electron
+const { app, BrowserWindow } = electron
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -8,20 +8,7 @@ let mainWindow
 const path = require('path')
 const url = require('url')
 
-var express = require('express')()
-var http = require('http').Server(express)
-var io = require('socket.io')(http)
-
-io.on('connection', (socket) => {
-  console.log('a client connected')
-  mainWindow.webContents.send('clientConnect', 'A client connected')
-})
-
-http.listen(8080, () => {
-  console.log('listening on *:8080')
-})
-
-function createWindow () {
+const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
 
