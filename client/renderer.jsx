@@ -17,17 +17,33 @@ socket.on('connect', () => {
   })
 })
 
+socket.on('heartbeat', (step) => {
+})
+
+
 class Tile extends React.Component {
+  componentWillMount() {
+    socket.on('heartbeat', (step) => {
+      this.setState(() => ({
+        highlight: this.props.sequenceNum === step
+      }))
+    })
+  }
+
   constructor(props) {
     super(props)
-    this.state = { active: 0 }
-    this.toggle = this.toggle.bind(this);
+    this.state = {
+      active: 0,
+      highlight: false
+    }
+    this.toggle = this.toggle.bind(this)
+
   }
 
   render() {
     return (
-      <button onClick={this.toggle} className="tile">
-      {this.state.active ? 'ON' : 'OFF'}
+      <button onClick={this.toggle} className={"tile " + (this.state.highlight ? 'highlight' : '')}>
+      {this.state.active ? 'ON' : ''}
       </button>
     )
   }

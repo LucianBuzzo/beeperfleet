@@ -5,8 +5,18 @@
 }
 
 .tile {
+  background: none;
+  border: 1px solid #333;
   width: 60px;
   height: 60px;
   margin: 5px;
   float: left;
+}
+
+.tile:focus {
+  outline: none;
+}
+
+.tile.highlight {
+  background-color: darkgray;
 }

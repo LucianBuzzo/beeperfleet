@@ -4,11 +4,17 @@ var io = require('socket.io')(http)
 const { ipcRenderer } = require('electron')
 const Immutable = require('immutable')
 const redux = require('redux')
+const Synthesizer = require('./synthesizer')
+
+const synth = new Synthesizer()
+
+console.log(synth)
 
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
 
-const BPM = 140
+const BPM = 160
+const NOTE_LENGTH = 100
 
 const ADD_SEQUENCE = 'ADD_SEQUENCE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
@@ -70,10 +76,14 @@ http.listen(8080, () => {
 })
 
 const tick = () => {
+  io.sockets.emit('heartbeat', currentStep)
   let sequences = store.getState().get('sequences').toArray()
   sequences.forEach(seq => {
     if (seq[currentStep] === 1) {
       console.log('beep')
+      synth.noteOn(60, 0.75)
+
+      setTimeout(() => synth.noteOff(60), NOTE_LENGTH)
     }
   })
 
