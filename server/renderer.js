@@ -18,6 +18,7 @@ const NOTE_LENGTH = 100
 
 const ADD_SEQUENCE = 'ADD_SEQUENCE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
+const REMOVE_SEQUENCE = 'REMOVE_SEQUENCE'
 
 let currentStep = 0
 
@@ -41,6 +42,8 @@ const reducer = (state, action) => {
         seq[action.tile] = action.value
         return seq
       })
+    case REMOVE_SEQUENCE:
+      return state.deleteIn(['sequences', action.id])
     default:
       return state
   }
@@ -50,9 +53,12 @@ let store = redux.createStore(reducer)
 
 io.on('connection', (socket) => {
   console.log('a client connected')
+  let localUUID
 
   socket.on('sequence', (data) => {
     console.log(data)
+    localUUID = data.id
+
     store.dispatch({
       type: ADD_SEQUENCE,
       id: data.id,
@@ -67,6 +73,13 @@ io.on('connection', (socket) => {
       id: data.id,
       tile: data.tile,
       value: data.value
+    })
+  })
+
+  socket.on('disconnect', () => {
+    store.dispatch({
+      type: REMOVE_SEQUENCE,
+      id: localUUID
     })
   })
 })
