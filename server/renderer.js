@@ -4,11 +4,11 @@ var io = require('socket.io')(http)
 const { ipcRenderer } = require('electron')
 const Immutable = require('immutable')
 const redux = require('redux')
+const _ = require('lodash')
+
 const Synthesizer = require('./synthesizer')
 
-const synth = new Synthesizer()
-
-console.log(synth)
+const synthMap = {}
 
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
@@ -76,6 +76,8 @@ io.on('connection', (socket) => {
     console.log(data)
     localUUID = data.id
 
+    synthMap[localUUID] = new Synthesizer()
+
     store.dispatch({
       type: ADD_SEQUENCE,
       id: data.id,
@@ -128,6 +130,8 @@ io.on('connection', (socket) => {
       type: REMOVE_SEQUENCE,
       id: localUUID
     })
+
+    delete synthMap[localUUID]
   })
 })
 
@@ -137,7 +141,19 @@ http.listen(8080, () => {
 
 const tick = () => {
   io.sockets.emit('heartbeat', currentStep)
-  let sequences = store.getState().get('sequences').toArray()
+  let sequences = store.getState().get('sequences').toJS()
+
+  _.forOwn(sequences, (sequence, uuid) => {
+    if (sequence[currentStep].active) {
+      // Add the zero to create a new variable instead of a reference
+      let midiNumber = sequence[currentStep].midiNumber + 0
+      synthMap[uuid].noteOn(midiNumber, sequence[currentStep].volume)
+
+      setTimeout(() => synthMap[uuid].noteOff(midiNumber), sequence[currentStep].length)
+    }
+  })
+
+  /*
   sequences.forEach(seq => {
     if (seq[currentStep].active) {
       // Add the zero to create a new variable instead of a reference
@@ -147,6 +163,7 @@ const tick = () => {
       setTimeout(() => synth.noteOff(midiNumber), seq[currentStep].length)
     }
   })
+  */
 
   currentStep++
   if (currentStep >= SEQUENCE_LENGTH) {
