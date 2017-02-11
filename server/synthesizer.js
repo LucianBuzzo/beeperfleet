@@ -212,8 +212,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateModFrequency(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateModFrequency(value) {
+    if (value < 0 || value > 10) {
+      throw new RangeError('value must be between 0 and 10')
+    }
     this.currentModFrequency = value
     var oscFreq = this.currentModFrequency * this.modOscFreqMultiplier
     for (var i = 0; i < 255; i++) {
@@ -223,8 +225,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateModOsc1(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateModOsc1(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentModOsc1 = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -233,8 +237,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateModOsc2(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateModOsc2(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentModOsc2 = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -243,8 +249,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateFilterCutoff(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateFilterCutoff(value) {
+    if (value < 20 || value > 20000) {
+      throw new RangeError
+    }
     this.currentFilterCutoff = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -253,7 +261,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateFilterQ(ev) {
+  onUpdateFilterQ(value) {
+    if (value < 0 || value > 20) {
+      throw new RangeError
+    }
     var value = ev.currentTarget ? ev.currentTarget.value : ev
     this.currentFilterQ = value
     for (var i = 0; i < 255; i++) {
@@ -263,8 +274,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateFilterMod(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateFilterMod(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentFilterMod = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -273,13 +286,18 @@ class Synthesizer {
     }
   }
 
-  onUpdateFilterEnv(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateFilterEnv(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentFilterEnv = value
   }
 
-  onUpdateOsc1Wave(ev) {
-    this.currentOsc1Waveform = ev.target.selectedIndex
+  onUpdateOsc1Wave(value) {
+    if (this.waveforms.indexOf(value) === -1) {
+      throw new RangeError
+    }
+    this.currentOsc1Waveform = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
         this.voices[i].setOsc1Waveform(this.waveforms[this.currentOsc1Waveform])
@@ -287,8 +305,12 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc1Octave(ev) {
-    this.currentOsc1Octave = ev.target.selectedIndex
+  onUpdateOsc1Octave(value) {
+    let options = ["32'","16'", "8'"]
+    if (options.indexOf(value) === -1) {
+      throw new RangeError
+    }
+    this.currentOsc1Octave = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
         this.voices[i].updateOsc1Frequency()
@@ -296,8 +318,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc1Detune(ev) {
-    var value = ev.currentTarget.value
+  onUpdateOsc1Detune(value) {
+    if (value < -1200 || value > 1200) {
+      throw new RangeError
+    }
     this.currentOsc1Detune = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -307,8 +331,8 @@ class Synthesizer {
   }
 
   onUpdateOsc1Mix(value) {
-    if (value.currentTarget) {
-      value = value.currentTarget.value
+    if (value < 0 || value > 100) {
+      throw new RangeError
     }
     this.currentOsc1Mix = value
     for (var i = 0; i < 255; i++) {
@@ -318,8 +342,11 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc2Wave(ev) {
-    this.currentOsc2Waveform = ev.target.selectedIndex
+  onUpdateOsc2Wave(value) {
+    if (this.waveforms.indexOf(value) === -1) {
+      throw new RangeError
+    }
+    this.currentOsc2Waveform = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
         this.voices[i].setOsc2Waveform(this.waveforms[this.currentOsc2Waveform])
@@ -327,8 +354,12 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc2Octave(ev) {
-    this.currentOsc2Octave = ev.target.selectedIndex
+  onUpdateOsc2Octave(value) {
+    let options = ["16'","8'", "4'"]
+    if (options.indexOf(value) === -1) {
+      throw new RangeError
+    }
+    this.currentOsc2Octave = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
         this.voices[i].updateOsc2Frequency()
@@ -336,8 +367,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc2Detune(ev) {
-    var value = ev.currentTarget.value
+  onUpdateOsc2Detune(value) {
+    if (value < -1200 || value > 1200) {
+      throw new RangeError
+    }
     this.currentOsc2Detune = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -346,8 +379,10 @@ class Synthesizer {
     }
   }
 
-  onUpdateOsc2Mix(ev) {
-    var value = ev.currentTarget.value
+  onUpdateOsc2Mix(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentOsc2Mix = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
@@ -356,49 +391,81 @@ class Synthesizer {
     }
   }
 
-  onUpdateEnvA(ev) {
-    this.currentEnvA = ev.currentTarget.value
+  onUpdateEnvA(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentEnvA = value
   }
 
-  onUpdateEnvD(ev) {
-    this.currentEnvD = ev.currentTarget.value
+  onUpdateEnvD(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentEnvD = value
   }
 
-  onUpdateEnvS(ev) {
-    this.currentEnvS = ev.currentTarget.value
+  onUpdateEnvS(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentEnvS = value
   }
 
-  onUpdateEnvR(ev) {
-    this.currentEnvR = ev.currentTarget.value
+  onUpdateEnvR(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentEnvR = value
   }
 
-  onUpdateFilterEnvA(ev) {
-    this.currentFilterEnvA = ev.currentTarget.value
+  onUpdateFilterEnvA(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentFilterEnvA = value
   }
 
-  onUpdateFilterEnvD(ev) {
-    this.currentFilterEnvD = ev.currentTarget.value
+  onUpdateFilterEnvD(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentFilterEnvD = value
   }
 
-  onUpdateFilterEnvS(ev) {
-    this.currentFilterEnvS = ev.currentTarget.value
+  onUpdateFilterEnvS(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentFilterEnvS = value
   }
 
-  onUpdateFilterEnvR(ev) {
-    this.currentFilterEnvR = ev.currentTarget.value
+  onUpdateFilterEnvR(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.currentFilterEnvR = value
   }
 
   onUpdateDrive(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     this.currentDrive = value
     this.waveshaper.setDrive(0.01 + this.currentDrive * this.currentDrive / 500)
   }
 
-  onUpdateVolume(ev) {
-    this.volNode.gain.value = (ev.currentTarget ? ev.currentTarget.value : ev) / 100
+  onUpdateVolume(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
+    this.volNode.gain.value = value / 100
   }
 
-  onUpdateReverb(ev) {
-    var value = ev.currentTarget ? ev.currentTarget.value : ev
+  onUpdateReverb(value) {
+    if (value < 0 || value > 100) {
+      throw new RangeError
+    }
     value = value / 100
 
     // equal-power crossfade
