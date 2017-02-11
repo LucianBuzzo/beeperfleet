@@ -16,7 +16,7 @@ const SEQUENCE_LENGTH = 16
 
 const BPM = 120
 
-const ADD_SEQUENCE = 'ADD_SEQUENCE'
+const INITIALISE = 'INITIALISE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
 const REMOVE_SEQUENCE = 'REMOVE_SEQUENCE'
 const UPDATE_SEQUENCE_MIDI = 'UPDATE_SEQUENCE_MIDI'
@@ -32,14 +32,14 @@ ipcRenderer.on('clientConnect', (event, arg) => {
 const reducer = (state, action) => {
   if (!state) {
     state = Immutable.fromJS({
-      sequences: {}
+      clients: {}
     })
   }
 
   switch (action.type) {
-    case ADD_SEQUENCE:
-      let { id, sequence } = action
-      return state.setIn(['sequences', id], sequence)
+    case INITIALISE:
+      let { id, layers } = action
+      return state.setIn(['clients', id], layers)
     case UPDATE_SEQUENCE:
       return state.updateIn(['sequences', action.id], (seq) => {
         seq[action.tile].active = action.value
@@ -73,16 +73,16 @@ io.on('connection', (socket) => {
   console.log('a client connected')
   let localUUID
 
-  socket.on('sequence', (data) => {
+  socket.on('initialise', (data) => {
     console.log(data)
     localUUID = data.id
 
     synthMap[localUUID] = new Synthesizer(audioContext)
 
     store.dispatch({
-      type: ADD_SEQUENCE,
+      type: INITIALISE,
       id: data.id,
-      sequence: data.sequence
+      layers: data.layers
     })
   })
 
@@ -160,6 +160,7 @@ http.listen(8080, () => {
 
 const tick = () => {
   io.sockets.emit('heartbeat', currentStep)
+  console.log(store.getState())
   let sequences = store.getState().get('sequences').toJS()
 
   _.forOwn(sequences, (sequence, uuid) => {

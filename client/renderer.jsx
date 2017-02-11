@@ -72,7 +72,7 @@ let store = redux.createStore(reducer)
 
 socket.on('connect', () => {
   console.log('connected')
-  socket.emit('sequence', {
+  socket.emit('initialise', {
     id: clientUUID,
     layers: store.getState().toJS().layers
   })
