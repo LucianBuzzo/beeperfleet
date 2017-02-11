@@ -1,5 +1,11 @@
 const electron = require('electron')
-const { app, BrowserWindow } = electron
+const { app, BrowserWindow, powerSaveBlocker } = electron
+
+// Stop the sequencer loop from being throttled when it's in the background
+app.commandLine.appendSwitch('page-visibility')
+app.commandLine.appendSwitch('disable-renderer-backgrounding')
+app.commandLine.appendSwitch('disable-background-timer-throttling')
+powerSaveBlocker.start('prevent-app-suspension')
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
