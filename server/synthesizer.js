@@ -1,11 +1,11 @@
+/**
+ * Borrowed from https://github.com/cwilso/midi-synth
+ */
+
 const WaveShaper = require('./waveshaper')
 const Voice = require('./voice')
 
 class Synthesizer {
-  /**
-   * Borrowed from https://github.com/cwilso/midi-synth
-   */
-
   constructor(audioContext = new AudioContext()) {
     this.audioContext = audioContext
 
