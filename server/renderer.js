@@ -153,18 +153,6 @@ const tick = () => {
     }
   })
 
-  /*
-  sequences.forEach(seq => {
-    if (seq[currentStep].active) {
-      // Add the zero to create a new variable instead of a reference
-      let midiNumber = seq[currentStep].midiNumber + 0
-      synth.noteOn(midiNumber, seq[currentStep].volume)
-
-      setTimeout(() => synth.noteOff(midiNumber), seq[currentStep].length)
-    }
-  })
-  */
-
   currentStep++
   if (currentStep >= SEQUENCE_LENGTH) {
     currentStep = 0
