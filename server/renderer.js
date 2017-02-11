@@ -13,13 +13,14 @@ console.log(synth)
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
 
-const BPM = 140
-const NOTE_LENGTH = 100
+const BPM = 120
 
 const ADD_SEQUENCE = 'ADD_SEQUENCE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
 const REMOVE_SEQUENCE = 'REMOVE_SEQUENCE'
 const UPDATE_SEQUENCE_MIDI = 'UPDATE_SEQUENCE_MIDI'
+const UPDATE_SEQUENCE_VOLUME = 'UPDATE_SEQUENCE_VOLUME'
+const UPDATE_SEQUENCE_LENGTH = 'UPDATE_SEQUENCE_LENGTH'
 
 let currentStep = 0
 
@@ -46,6 +47,16 @@ const reducer = (state, action) => {
     case UPDATE_SEQUENCE_MIDI:
       return state.updateIn(['sequences', action.id], (seq) => {
         seq[action.tile].midiNumber = action.value
+        return seq
+      })
+    case UPDATE_SEQUENCE_VOLUME:
+      return state.updateIn(['sequences', action.id], (seq) => {
+        seq[action.tile].volume = action.value
+        return seq
+      })
+    case UPDATE_SEQUENCE_LENGTH:
+      return state.updateIn(['sequences', action.id], (seq) => {
+        seq[action.tile].length = action.value
         return seq
       })
     case REMOVE_SEQUENCE:
@@ -92,6 +103,26 @@ io.on('connection', (socket) => {
     })
   })
 
+  socket.on('sequenceVolumeUpdate', (data) => {
+    console.log(data)
+    store.dispatch({
+      type: UPDATE_SEQUENCE_VOLUME,
+      id: data.id,
+      tile: data.tile,
+      value: data.value
+    })
+  })
+
+  socket.on('sequenceLengthUpdate', (data) => {
+    console.log(data)
+    store.dispatch({
+      type: UPDATE_SEQUENCE_LENGTH,
+      id: data.id,
+      tile: data.tile,
+      value: data.value
+    })
+  })
+
   socket.on('disconnect', () => {
     store.dispatch({
       type: REMOVE_SEQUENCE,
@@ -111,9 +142,9 @@ const tick = () => {
     if (seq[currentStep].active) {
       // Add the zero to create a new variable instead of a reference
       let midiNumber = seq[currentStep].midiNumber + 0
-      synth.noteOn(midiNumber, 0.75)
+      synth.noteOn(midiNumber, seq[currentStep].volume)
 
-      setTimeout(() => synth.noteOff(midiNumber), NOTE_LENGTH)
+      setTimeout(() => synth.noteOff(midiNumber), seq[currentStep].length)
     }
   })
 

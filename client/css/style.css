@@ -1,49 +1,6 @@
-.grid {
-  margin: 100px auto;
-  width: 280px;
-  height: 280px;
-}
-
-.tile {
-  background: none;
-  border: 1px solid #333;
-  width: 60px;
-  height: 60px;
-  margin: 5px;
-  float: left;
-  position: relative;
-  padding: 0;
-}
-
-.tile:focus {
-  outline: none;
-}
-
-.tile.highlight {
-  background-color: darkgray;
-}
-
-input[type=range] {
-}
-
-.pitchslide {
-  -webkit-appearance: none;
-  width: 58px;
-  height: 10px;
-  position: absolute;
-  top: 22px;
-  right: -17px;
-  transform: rotate(90deg);
-  background: none;
-}
-
-input[type=range]:focus {
-  outline: none;
-}
-.pitchslide::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 8px;
-  height: 30px;
-  background: black;
-}
+@import url('./slider.css');
+@import url('./colors.css');
+@import url('./grid.css');
+@import url('./tile.css');
+@import url('./toolbar.css');
 
