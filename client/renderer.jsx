@@ -6,18 +6,61 @@ const ReactDOM = require('react-dom')
 const Immutable = require('immutable')
 const redux = require('redux')
 
+// TODO: Should be in a shared config
+const SEQUENCE_LENGTH = 16
+
 const CHANGE_MODE = 'CHANGE_MODE'
+const ADD_LAYER = 'ADD_LAYER'
+const ACTIVATE_LAYER = 'ACTIVATE_LAYER'
+const SEQ_ACTIVE_UPDATE = 'SEQ_ACTIVE_UPDATE'
+const SEQ_VOLUME_UPDATE = 'SEQ_VOLUME_UPDATE'
+const SEQ_LENGTH_UPDATE = 'SEQ_LENGTH_UPDATE'
+const SEQ_PITCH_UPDATE = 'SEQ_PITCH_UPDATE'
+
+const createSequence = () => [...Array(SEQUENCE_LENGTH)].map(() => ({
+  active: false,
+  midiNumber: 60,
+  volume: 0.5,
+  length: 100
+}))
+
+const createLayer = (nameNumber = 1) => ({
+  name: 'Layer ' + nameNumber,
+  active: false,
+  sequence: createSequence(),
+  synthOptions: {}
+})
+
 
 const reducer = (state, action) => {
   if (!state) {
     state = Immutable.fromJS({
-      mode: 'note'
+      mode: 'note',
+      layers: [createLayer()]
     })
   }
 
   switch (action.type) {
     case CHANGE_MODE:
       return state.set('mode', action.value)
+    case ADD_LAYER:
+      return state.updateIn(['layers'], layers => layers.push(Immutable.fromJS(action.value)))
+    case ACTIVATE_LAYER:
+      console.log(action)
+      return state.updateIn(['layers'], layers => layers.map((layer, index) => {
+        console.log(layer.toJS())
+        return index === action.value ?
+          layer.set('active', true) :
+          layer.set('active', false)
+      }))
+    case SEQ_ACTIVE_UPDATE:
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'active'], action.value)
+    case SEQ_LENGTH_UPDATE:
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'length'], action.value)
+    case SEQ_PITCH_UPDATE:
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'midiNumber'], action.value)
+    case SEQ_VOLUME_UPDATE:
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'volume'], action.value)
     default:
       return state
   }
@@ -25,41 +68,27 @@ const reducer = (state, action) => {
 
 let store = redux.createStore(reducer)
 
-// TODO: Should be in a shared config
-const SEQUENCE_LENGTH = 16
-
-const sequence = [...Array(SEQUENCE_LENGTH)].map(() => ({
-  active: false,
-  midiNumber: 60,
-  volume: 0.5,
-  length: 100
-}))
-
-store.subscribe(() => {
-  console.log(store.getState().toJS())
-})
-
 socket.on('connect', () => {
   console.log('connected')
   socket.emit('sequence', {
     id: clientUUID,
-    sequence
+    layers: store.getState().toJS().layers
   })
 })
 
 class Tile extends React.Component {
   componentWillMount() {
     socket.on('heartbeat', (step) => {
-      this.setState(() => ({
+      this.setState({
         highlight: this.props.sequenceNum === step
-      }))
+      })
     })
   }
 
   constructor(props) {
     super(props)
     this.state = {
-      active: 0,
+      active: false,
       highlight: false,
       midiNumber: 60,
       volume: 0.5,
@@ -106,7 +135,12 @@ class Tile extends React.Component {
   handleLengthChange(e) {
     let val = parseInt(e.target.value, 10)
     this.setState({ length: val })
-    sequence[this.props.sequenceNum].length = val
+    store.dispatch({
+      type: SEQ_LENGTH_UPDATE,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      value: val
+    })
     socket.emit('sequenceLengthUpdate', {
       id: clientUUID,
       tile: this.props.sequenceNum,
@@ -116,9 +150,13 @@ class Tile extends React.Component {
 
   handleVolumeChange(e) {
     let val = (100 - parseInt(e.target.value, 10)) / 100
-    console.log(val)
     this.setState({ volume: val })
-    sequence[this.props.sequenceNum].volume = val
+    store.dispatch({
+      type: SEQ_VOLUME_UPDATE,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      value: val
+    })
     socket.emit('sequenceVolumeUpdate', {
       id: clientUUID,
       tile: this.props.sequenceNum,
@@ -128,9 +166,13 @@ class Tile extends React.Component {
 
   handleChange(e) {
     let val = 71 - parseInt(e.target.value, 10)
-    console.log(val)
     this.setState({ midiNumber: val })
-    sequence[this.props.sequenceNum].midiNumber = val
+    store.dispatch({
+      type: SEQ_PITCH_UPDATE,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      value: val
+    })
     socket.emit('sequenceMidiUpdate', {
       id: clientUUID,
       tile: this.props.sequenceNum,
@@ -142,11 +184,15 @@ class Tile extends React.Component {
     e.stopPropagation()
   }
 
-  toggle(e) {
-    console.log(e)
+  toggle() {
     let active = !this.state.active
     this.setState(() => ({ active }))
-    sequence[this.props.sequenceNum].active = active
+    store.dispatch({
+      type: SEQ_ACTIVE_UPDATE,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      value: active
+    })
     socket.emit('sequenceUpdate', {
       id: clientUUID,
       tile: this.props.sequenceNum,
@@ -155,25 +201,67 @@ class Tile extends React.Component {
   }
 }
 
-class Grid extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      mode: store.getState().get('mode')
-    }
+class Layer extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { active: false }
+    this.selectLayer = this.selectLayer.bind(this)
 
     store.subscribe(() => {
-      let mode = store.getState().get('mode')
-      this.setState({ mode })
+      let active = store.getState().getIn(['layers', this.props.layerNumber, 'active'])
+      this.setState({ active })
+    })
+  }
+
+  selectLayer() {
+    console.log('SELECT LAYER')
+    store.dispatch({
+      type: ACTIVATE_LAYER,
+      value: this.props.layerNumber
+    })
+    store.dispatch({
+      type: CHANGE_MODE,
+      value: 'note'
     })
   }
 
   render() {
-    const tiles = sequence.map((item, index) =>
-      <Tile sequenceNum={index} key={index} />
+    const tiles = this.props.layer.sequence.map((item, index) =>
+      <Tile sequenceNum={index} key={index} layer={this.props.layerNumber} />
     )
     return (
-      <div className={"grid mode-" + this.state.mode}>{tiles}</div>
+      <div style={{top: this.props.layerNumber * 100, zIndex: 999 - this.props.layerNumber}}
+        className={"layer clearfix " + (this.state.active ? 'active' : '')}>
+        <div onClick={this.selectLayer} className="layer__mask"></div>
+        {tiles}
+      </div>
+    )
+  }
+}
+
+class Grid extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      mode: store.getState().get('mode'),
+      layers: store.getState().get('layers').toJS()
+    }
+
+    store.subscribe(() => {
+      let mode = store.getState().get('mode')
+      let layers = store.getState().get('layers').toJS()
+      this.setState({ mode, layers })
+      this.forceUpdate()
+    })
+  }
+
+  render() {
+    const contents = this.state.layers.map((layer, index) =>
+      <Layer layer={layer} layerNumber={index} key={index} />
+    )
+    return (
+      <div className={"grid mode-" + this.state.mode + ' ' + (this.state.mode !== 'layers' ? 'flat' : '')}
+        style={{top: 0 - (this.state.layers.length - 1) * 50}}>{contents}</div>
     )
   }
 }
@@ -192,6 +280,12 @@ class Toolbar extends React.Component {
     store.dispatch({
       type: CHANGE_MODE,
       value: mode
+    })
+  }
+  addLayer() {
+    store.dispatch({
+      type: ADD_LAYER,
+      value: createLayer(store.getState().get('layers').size + 1)
     })
   }
   render() {
@@ -215,7 +309,15 @@ class Toolbar extends React.Component {
         <button
           onClick={() => this.setActive('controls')}
           className = {(this.state.activeButton === 'controls' ? 'active' : '')}>
-          <i className="fa fa-tachometer" aria-hidden="true"></i>
+          <i className="fa fa-sliders" aria-hidden="true"></i>
+        </button>
+        <button
+          onClick={() => this.setActive('layers')}
+          className = {(this.state.activeButton === 'layers' ? 'active' : '')}>
+          <i className="fa fa-server" aria-hidden="true"></i>
+        </button>
+        <button onClick={this.addLayer}>
+          <i className="fa fa-plus" aria-hidden="true"></i>
         </button>
       </div>
     )
@@ -245,7 +347,6 @@ class Controls extends React.Component {
   }
 
   handleFilterCutoffChange(event) {
-    console.log(event.target.value)
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterCutoffUpdate', {
       id: clientUUID,
@@ -255,7 +356,6 @@ class Controls extends React.Component {
   }
 
   handleFilterQChange(event) {
-    console.log(event.target.value)
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterQUpdate', {
       id: clientUUID,
@@ -264,7 +364,6 @@ class Controls extends React.Component {
     this.setState({ filterQ: value })
   }
   handleFilterModChange(event) {
-    console.log(event.target.value)
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterModUpdate', {
       id: clientUUID,
@@ -273,7 +372,6 @@ class Controls extends React.Component {
     this.setState({ filterMod: value })
   }
   handleFilterEnvChange(event) {
-    console.log(event.target.value)
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterEnvUpdate', {
       id: clientUUID,

@@ -2,8 +2,51 @@
   margin: 100px auto;
   width: 280px;
   height: 280px;
+  position: relative;
+  transition: top ease-in-out 250ms;
 }
 
 .grid.mode-controls {
   display: none;
 }
+
+.grid.flat {
+  top: 0 !important;
+  transition: all ease-in-out 250ms;
+}
+
+.grid.flat .layer {
+  top: 0 !important;
+}
+
+.grid.mode-layers .layer {
+  display: block;
+  transform: rotateX(65deg) rotateZ(45deg);
+}
+
+.grid.mode-flat .layer__mask {
+  display: none;
+}
+
+.grid.mode-layers .layer__mask {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.grid.mode-layers .layer:hover {
+  outline: 4px solid black;
+}
+
+.layer {
+  position: absolute;
+  transition: transform ease-in-out 250ms, top ease-in-out 250ms;
+}
+
+.layer.active {
+  z-index: 9999 !important;
+}
+

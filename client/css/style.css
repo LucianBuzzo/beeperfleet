@@ -8,3 +8,8 @@
 body {
   font-family: courier, monospace;
 }
+
+.clearfix {
+  overflow: auto;
+  zoom: 1;
+}

@@ -1,12 +1,12 @@
-.mode-note .active .slider-note {
+.mode-note button.active .slider-note {
   display: block;
 }
 
-.mode-volume .active .slider-volume {
+.mode-volume button.active .slider-volume {
   display: block;
 }
 
-.mode-length .active .slider-length {
+.mode-length button.active .slider-length {
   display: block;
 }
 
