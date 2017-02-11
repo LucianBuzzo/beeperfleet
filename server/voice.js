@@ -24,17 +24,17 @@ const Voice = function Voice(note, velocity, synth) {
   this.currentPitchWheel = synth.currentPitchWheel
   this.currentEnvR = synth.currentEnvR
   this.currentFilterEnvR = synth.currentFilterEnvR
+  this.currentFilterCutoff = synth.currentFilterCutoff
+  this.currentFilterMod = synth.currentFilterMod
   let {
     audioContext,
     currentEnvA,
     currentEnvD,
     currentEnvS,
-    currentFilterCutoff,
     currentFilterEnv,
     currentFilterEnvA,
     currentFilterEnvD,
     currentFilterEnvS,
-    currentFilterMod,
     currentFilterQ,
     currentModFrequency,
     currentModOsc1,
@@ -90,11 +90,11 @@ const Voice = function Voice(note, velocity, synth) {
   this.filter1 = audioContext.createBiquadFilter()
   this.filter1.type = "lowpass"
   this.filter1.Q.value = currentFilterQ
-  this.filter1.frequency.value = Math.pow(2, currentFilterCutoff)
+  this.filter1.frequency.value = Math.pow(2, this.currentFilterCutoff)
   this.filter2 = audioContext.createBiquadFilter()
   this.filter2.type = "lowpass"
   this.filter2.Q.value = currentFilterQ
-  this.filter2.frequency.value = Math.pow(2, currentFilterCutoff)
+  this.filter2.frequency.value = Math.pow(2, this.currentFilterCutoff)
 
   this.osc1Gain.connect(this.filter1)
   this.osc2Gain.connect(this.filter1)
@@ -103,7 +103,7 @@ const Voice = function Voice(note, velocity, synth) {
   // connect the modulator to the filters
   this.modFilterGain = audioContext.createGain()
   this.modOsc.connect(this.modFilterGain)
-  this.modFilterGain.gain.value = currentFilterMod * 24
+  this.modFilterGain.gain.value = this.currentFilterMod * 24
   this.modFilterGain.connect(this.filter1.detune)	// filter tremolo
   this.modFilterGain.connect(this.filter2.detune)	// filter tremolo
 

@@ -125,6 +125,23 @@ io.on('connection', (socket) => {
     })
   })
 
+  socket.on('synthFilterCutoffUpdate', (data) => {
+    console.log(data)
+    synthMap[data.id].updateFilterCutoff(data.value)
+  })
+  socket.on('synthFilterQUpdate', (data) => {
+    console.log(data)
+    synthMap[data.id].updateFilterQ(data.value)
+  })
+  socket.on('synthFilterModUpdate', (data) => {
+    console.log(data)
+    synthMap[data.id].updateFilterMod(data.value)
+  })
+  socket.on('synthFilterEnvUpdate', (data) => {
+    console.log(data)
+    synthMap[data.id].updateFilterEnv(data.value)
+  })
+
   socket.on('disconnect', () => {
     store.dispatch({
       type: REMOVE_SEQUENCE,
@@ -145,11 +162,12 @@ const tick = () => {
 
   _.forOwn(sequences, (sequence, uuid) => {
     if (sequence[currentStep].active) {
+      let { midiNumber, volume, length } = sequence[currentStep]
       // Add the zero to create a new variable instead of a reference
-      let midiNumber = sequence[currentStep].midiNumber + 0
-      synthMap[uuid].noteOn(midiNumber, sequence[currentStep].volume)
+      midiNumber = midiNumber + 0
+      synthMap[uuid].noteOn(midiNumber, volume)
 
-      setTimeout(() => synthMap[uuid].noteOff(midiNumber), sequence[currentStep].length)
+      setTimeout(() => synthMap[uuid].noteOff(midiNumber), length)
     }
   })
 

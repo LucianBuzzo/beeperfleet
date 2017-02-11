@@ -217,12 +217,96 @@ class Toolbar extends React.Component {
   }
 }
 
+class Controls extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      filterCutoff: 256,
+      filterQ: 7,
+      filterMod: 21,
+      filterEnv: 56
+    }
+    this.handleFilterCutoffChange = this.handleFilterCutoffChange.bind(this)
+    this.handleFilterQChange = this.handleFilterQChange.bind(this)
+    this.handleFilterModChange = this.handleFilterModChange.bind(this)
+    this.handleFilterEnvChange = this.handleFilterEnvChange.bind(this)
+  }
+
+  handleFilterCutoffChange(event) {
+    console.log(event.target.value)
+    let value = parseInt(event.target.value, 10)
+    socket.emit('synthFilterCutoffUpdate', {
+      id: clientUUID,
+      value,
+    })
+    this.setState({ filterCutoff: value })
+  }
+
+  handleFilterQChange(event) {
+    console.log(event.target.value)
+    let value = parseInt(event.target.value, 10)
+    socket.emit('synthFilterQUpdate', {
+      id: clientUUID,
+      value,
+    })
+    this.setState({ filterQ: value })
+  }
+  handleFilterModChange(event) {
+    console.log(event.target.value)
+    let value = parseInt(event.target.value, 10)
+    socket.emit('synthFilterModUpdate', {
+      id: clientUUID,
+      value,
+    })
+    this.setState({ filterMod: value })
+  }
+  handleFilterEnvChange(event) {
+    console.log(event.target.value)
+    let value = parseInt(event.target.value, 10)
+    socket.emit('synthFilterEnvUpdate', {
+      id: clientUUID,
+      value,
+    })
+    this.setState({ filterEnv: value })
+  }
+
+  render() {
+    return (
+      <div className="controls">
+        <h2>Filter</h2>
+        <div>
+          Cutoff
+          <br />
+          <input onChange={this.handleFilterCutoffChange} value={this.state.filterCutoff} min="20" max="20000" type="range" />
+        </div>
+        <div>
+          Q
+          <br />
+          <input onChange={this.handleFilterQChange} value={this.state.filterQ} min="0" max="20" type="range" />
+        </div>
+        <div>
+          Mod
+          <br />
+          <input onChange={this.handleFilterModChange} value={this.state.filterMod} min="0" max="100" type="range" />
+        </div>
+        <div>
+          Env
+          <br />
+          <input onChange={this.handleFilterEnvChange} value={this.state.filterEnv} min="0" max="100" type="range" />
+        </div>
+        <hr />
+      </div>
+    )
+  }
+}
+
 class Beeper extends React.Component {
   render() {
     return (
       <div className="beeper">
         <Toolbar />
         <Grid />
+        <Controls />
       </div>
     )
   }

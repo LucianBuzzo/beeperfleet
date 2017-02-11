@@ -183,10 +183,12 @@ class Synthesizer {
     }
   }
 
+  // Range is in HZ
   updateFilterCutoff(value) {
     if (value < 20 || value > 20000) {
       throw new RangeError()
     }
+    value = Math.sqrt(value) / 10
     this.currentFilterCutoff = value
     for (var i = 0; i < 255; i++) {
       if (this.voices[i]) {
