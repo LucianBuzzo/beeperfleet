@@ -212,6 +212,11 @@ class Toolbar extends React.Component {
           className = {(this.state.activeButton === 'length' ? 'active' : '')}>
           <i className="fa fa-arrows-h" aria-hidden="true"></i>
         </button>
+        <button
+          onClick={() => this.setActive('controls')}
+          className = {(this.state.activeButton === 'controls' ? 'active' : '')}>
+          <i className="fa fa-tachometer" aria-hidden="true"></i>
+        </button>
       </div>
     )
   }
@@ -221,11 +226,18 @@ class Controls extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
+      active: false,
       filterCutoff: 256,
       filterQ: 7,
       filterMod: 21,
       filterEnv: 56
     }
+
+    store.subscribe(() => {
+      let mode = store.getState().get('mode')
+      this.setState({ active: mode === 'controls' })
+    })
+
     this.handleFilterCutoffChange = this.handleFilterCutoffChange.bind(this)
     this.handleFilterQChange = this.handleFilterQChange.bind(this)
     this.handleFilterModChange = this.handleFilterModChange.bind(this)
@@ -272,7 +284,7 @@ class Controls extends React.Component {
 
   render() {
     return (
-      <div className="controls">
+      <div className={"controls " + (this.state.active ? 'active' : '')}>
         <h2>Filter</h2>
         <div>
           Cutoff
@@ -294,7 +306,6 @@ class Controls extends React.Component {
           <br />
           <input onChange={this.handleFilterEnvChange} value={this.state.filterEnv} min="0" max="100" type="range" />
         </div>
-        <hr />
       </div>
     )
   }

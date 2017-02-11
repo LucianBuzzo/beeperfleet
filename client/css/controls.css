@@ -1,0 +1,9 @@
+.controls {
+  display: none;
+  margin: 100px auto;
+  width: 400px;
+}
+
+.controls.active {
+  display: block;
+}

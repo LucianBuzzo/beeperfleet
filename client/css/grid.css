@@ -3,3 +3,7 @@
   width: 280px;
   height: 280px;
 }
+
+.grid.mode-controls {
+  display: none;
+}
