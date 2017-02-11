@@ -6,9 +6,10 @@ class Synthesizer {
    * Borrowed from https://github.com/cwilso/midi-synth
    */
 
-  constructor() {
+  constructor(audioContext = new AudioContext()) {
+    this.audioContext = audioContext
+
     this.voices = []
-    this.audioContext = null
 
     this.currentOctave = 3
     this.modOscFreqMultiplier = 1
@@ -110,7 +111,7 @@ class Synthesizer {
     this.revBypassGain = null
     this.compressor = null
 
-    this.initAudio()
+    this.initAudio(audioContext)
   }
 
   noteOn(note, velocity) {
@@ -421,8 +422,6 @@ class Synthesizer {
   }
 
   initAudio() {
-    this.audioContext = new AudioContext()
-
     // set up the master effects chain for all voices to connect to.
     this.effectChain = this.audioContext.createGain()
     this.waveshaper = new WaveShaper(this.audioContext)
@@ -457,6 +456,12 @@ class Synthesizer {
     }
     irRRequest.send()
 
+  }
+
+  destroy() {
+    for (var i = 0; i < this.voices.length; i++) {
+      delete this.voices[i]
+    }
   }
 }
 

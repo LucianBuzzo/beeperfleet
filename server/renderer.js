@@ -6,6 +6,7 @@ const Immutable = require('immutable')
 const redux = require('redux')
 const _ = require('lodash')
 
+const audioContext = new AudioContext()
 const Synthesizer = require('./synthesizer')
 
 const synthMap = {}
@@ -76,7 +77,7 @@ io.on('connection', (socket) => {
     console.log(data)
     localUUID = data.id
 
-    synthMap[localUUID] = new Synthesizer()
+    synthMap[localUUID] = new Synthesizer(audioContext)
 
     store.dispatch({
       type: ADD_SEQUENCE,
@@ -148,6 +149,7 @@ io.on('connection', (socket) => {
       id: localUUID
     })
 
+    synthMap[localUUID].destroy()
     delete synthMap[localUUID]
   })
 })
