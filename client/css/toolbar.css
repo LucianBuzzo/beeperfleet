@@ -4,6 +4,12 @@
   top 15px;
   left: 30px;
 }
+
+.toolbar-right {
+  left: auto;
+  right: 30px;
+}
+
 .toolbar button {
   padding: 0;
   background: none;

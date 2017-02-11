@@ -12,6 +12,7 @@ const SEQUENCE_LENGTH = 16
 const CHANGE_MODE = 'CHANGE_MODE'
 const ADD_LAYER = 'ADD_LAYER'
 const ACTIVATE_LAYER = 'ACTIVATE_LAYER'
+const TOGGLE_LAYERS = 'TOGGLE_LAYERS'
 const SEQ_ACTIVE_UPDATE = 'SEQ_ACTIVE_UPDATE'
 const SEQ_VOLUME_UPDATE = 'SEQ_VOLUME_UPDATE'
 const SEQ_LENGTH_UPDATE = 'SEQ_LENGTH_UPDATE'
@@ -36,7 +37,8 @@ const reducer = (state, action) => {
   if (!state) {
     state = Immutable.fromJS({
       mode: 'note',
-      layers: [createLayer()]
+      layers: [createLayer()],
+      showLayers: false
     })
   }
 
@@ -45,14 +47,14 @@ const reducer = (state, action) => {
       return state.set('mode', action.value)
     case ADD_LAYER:
       return state.updateIn(['layers'], layers => layers.push(Immutable.fromJS(action.value)))
+    case TOGGLE_LAYERS:
+      return state.set('showLayers', !state.get('showLayers'))
     case ACTIVATE_LAYER:
-      console.log(action)
       return state.updateIn(['layers'], layers => layers.map((layer, index) => {
-        console.log(layer.toJS())
         return index === action.value ?
           layer.set('active', true) :
           layer.set('active', false)
-      }))
+      })).set('showLayers', !state.get('showLayers'))
     case SEQ_ACTIVE_UPDATE:
       return state.setIn(['layers', action.layer, 'sequence', action.tile, 'active'], action.value)
     case SEQ_LENGTH_UPDATE:
@@ -244,13 +246,16 @@ class Grid extends React.Component {
     super()
     this.state = {
       mode: store.getState().get('mode'),
-      layers: store.getState().get('layers').toJS()
+      layers: store.getState().get('layers').toJS(),
+      showLayers: store.getState().get('showLayers')
     }
 
     store.subscribe(() => {
       let mode = store.getState().get('mode')
       let layers = store.getState().get('layers').toJS()
-      this.setState({ mode, layers })
+      let showLayers = store.getState().get('showLayers')
+      console.log(layers)
+      this.setState({ mode, layers, showLayers })
       this.forceUpdate()
     })
   }
@@ -260,13 +265,13 @@ class Grid extends React.Component {
       <Layer layer={layer} layerNumber={index} key={index} />
     )
     return (
-      <div className={"grid mode-" + this.state.mode + ' ' + (this.state.mode !== 'layers' ? 'flat' : '')}
+      <div className={"grid mode-" + this.state.mode + ' ' + (this.state.showLayers ? 'mode-layers' : 'flat')}
         style={{top: 0 - (this.state.layers.length - 1) * 50}}>{contents}</div>
     )
   }
 }
 
-class Toolbar extends React.Component {
+class ToolbarLeft extends React.Component {
   constructor(props) {
     super(props)
     this.state = { activeButton: 'note' }
@@ -290,7 +295,7 @@ class Toolbar extends React.Component {
   }
   render() {
     return (
-      <div className="toolbar">
+      <div className="toolbar toolbar-left">
         <button
           onClick={() => this.setActive('note')}
           className = {(this.state.activeButton === 'note' ? 'active' : '')}>
@@ -314,6 +319,39 @@ class Toolbar extends React.Component {
         <button
           onClick={() => this.setActive('layers')}
           className = {(this.state.activeButton === 'layers' ? 'active' : '')}>
+          <i className="fa fa-server" aria-hidden="true"></i>
+        </button>
+        <button onClick={this.addLayer}>
+          <i className="fa fa-plus" aria-hidden="true"></i>
+        </button>
+      </div>
+    )
+  }
+}
+
+class ToolbarRight extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  addLayer() {
+    console.log('add layer')
+    store.dispatch({
+      type: ADD_LAYER,
+      value: createLayer(store.getState().get('layers').size + 1)
+    })
+  }
+
+  toggleLayers() {
+    store.dispatch({
+      type: TOGGLE_LAYERS
+    })
+  }
+  render() {
+    return (
+      <div className="toolbar toolbar-right">
+        <button
+          onClick={this.toggleLayers}>
           <i className="fa fa-server" aria-hidden="true"></i>
         </button>
         <button onClick={this.addLayer}>
@@ -413,7 +451,8 @@ class Beeper extends React.Component {
   render() {
     return (
       <div className="beeper">
-        <Toolbar />
+        <ToolbarLeft />
+        <ToolbarRight />
         <Grid />
         <Controls />
       </div>

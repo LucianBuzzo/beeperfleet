@@ -46,7 +46,7 @@
   transition: transform ease-in-out 250ms, top ease-in-out 250ms;
 }
 
-.layer.active {
+.grid:not(.mode-layers) .layer.active {
   z-index: 9999 !important;
 }
 
