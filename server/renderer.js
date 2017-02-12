@@ -19,6 +19,7 @@ const BPM = 120
 const ADD_LAYER = 'ADD_LAYER'
 const INITIALISE = 'INITIALISE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
+const UPDATE_SYNTH = 'UPDATE_SYNTH'
 const REMOVE_CLIENT = 'REMOVE_CLIENT'
 
 let currentStep = 0
@@ -59,7 +60,12 @@ io.on('connection', (socket) => {
     console.log(data)
     localUUID = data.id
 
-    synthMap[localUUID] = new Synthesizer(audioContext)
+    data.layers.forEach(() => {
+      if (!synthMap[localUUID]) {
+        synthMap[localUUID] = []
+      }
+      synthMap[localUUID].push(new Synthesizer(audioContext))
+    })
 
     store.dispatch({
       type: INITIALISE,
@@ -81,6 +87,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on(ADD_LAYER, (data) => {
+    synthMap[localUUID].push(new Synthesizer(audioContext))
     store.dispatch({
       type: ADD_LAYER,
       id: data.id,
@@ -88,21 +95,25 @@ io.on('connection', (socket) => {
     })
   })
 
+  socket.on(UPDATE_SYNTH, (data) => {
+  })
+
   socket.on('synthFilterCutoffUpdate', (data) => {
     console.log(data)
-    synthMap[data.id].updateFilterCutoff(data.value)
+    console.log(synthMap)
+    synthMap[data.id][data.layer].updateFilterCutoff(data.value)
   })
   socket.on('synthFilterQUpdate', (data) => {
     console.log(data)
-    synthMap[data.id].updateFilterQ(data.value)
+    synthMap[data.id][data.layer].updateFilterQ(data.value)
   })
   socket.on('synthFilterModUpdate', (data) => {
     console.log(data)
-    synthMap[data.id].updateFilterMod(data.value)
+    synthMap[data.id][data.layer].updateFilterMod(data.value)
   })
   socket.on('synthFilterEnvUpdate', (data) => {
     console.log(data)
-    synthMap[data.id].updateFilterEnv(data.value)
+    synthMap[data.id][data.layer].updateFilterEnv(data.value)
   })
 
   socket.on('disconnect', () => {
@@ -111,8 +122,10 @@ io.on('connection', (socket) => {
       id: localUUID
     })
 
-    synthMap[localUUID].destroy()
-    delete synthMap[localUUID]
+    for (var i = 0; i < synthMap[localUUID].length; i++) {
+      synthMap[localUUID][i].destroy()
+      delete synthMap[localUUID][i]
+    }
   })
 })
 
@@ -125,14 +138,14 @@ const tick = () => {
   let clients = store.getState().get('clients').toJS()
 
   _.forOwn(clients, (layers, uuid) => {
-    layers.forEach((layer) => {
+    layers.forEach((layer, layerIndex) => {
       if (layer.sequence[currentStep].active) {
         let { pitch, gain, length } = layer.sequence[currentStep]
         // Add the zero to create a new variable instead of a reference
         pitch = pitch + 0
-        synthMap[uuid].noteOn(pitch, gain)
+        synthMap[uuid][layerIndex].noteOn(pitch, gain)
 
-        setTimeout(() => synthMap[uuid].noteOff(pitch), length)
+        setTimeout(() => synthMap[uuid][layerIndex].noteOff(pitch), length)
       }
     })
   })

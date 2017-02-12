@@ -5,6 +5,7 @@ const React = require('react')
 const ReactDOM = require('react-dom')
 const Immutable = require('immutable')
 const redux = require('redux')
+const _ = require('lodash')
 
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
@@ -31,7 +32,12 @@ const createLayer = (nameNumber = 1) => ({
   name: 'Layer ' + nameNumber,
   active: false,
   sequence: createSequence(),
-  synthOptions: {}
+  synthOptions: {
+    filterCutoff: 256,
+    filterQ: 7,
+    filterMod: 21,
+    filterEnv: 56
+  }
 })
 
 
@@ -343,7 +349,25 @@ class Controls extends React.Component {
 
     store.subscribe(() => {
       let mode = store.getState().get('mode')
-      this.setState({ active: mode === 'controls' })
+      let layers = store.getState().get('layers').toJS()
+      let activeLayer = _.find(layers, { active: true })
+      if (!activeLayer) {
+        activeLayer = layers[0]
+      }
+      console.log('ACTIVELAYER', activeLayer)
+      let {
+        filterCutoff,
+        filterQ,
+        filterMod,
+        filterEnv
+      } = activeLayer.synthOptions
+      this.setState({
+        active: mode === 'controls',
+        filterCutoff,
+        filterQ,
+        filterMod,
+        filterEnv
+      })
     })
 
     this.handleFilterCutoffChange = this.handleFilterCutoffChange.bind(this)
@@ -353,34 +377,58 @@ class Controls extends React.Component {
   }
 
   handleFilterCutoffChange(event) {
+    let layers = store.getState().get('layers').toJS()
+    let activeLayer = _.findIndex(layers, { active: true })
+    if (activeLayer < 0) {
+      activeLayer = 0
+    }
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterCutoffUpdate', {
       id: clientUUID,
+      layer: activeLayer,
       value,
     })
     this.setState({ filterCutoff: value })
   }
 
   handleFilterQChange(event) {
+    let layers = store.getState().get('layers').toJS()
+    let activeLayer = _.findIndex(layers, { active: true })
+    if (activeLayer < 0) {
+      activeLayer = 0
+    }
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterQUpdate', {
       id: clientUUID,
+      layer: activeLayer,
       value,
     })
     this.setState({ filterQ: value })
   }
   handleFilterModChange(event) {
+    let layers = store.getState().get('layers').toJS()
+    let activeLayer = _.findIndex(layers, { active: true })
+    if (activeLayer < 0) {
+      activeLayer = 0
+    }
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterModUpdate', {
       id: clientUUID,
+      layer: activeLayer,
       value,
     })
     this.setState({ filterMod: value })
   }
   handleFilterEnvChange(event) {
+    let layers = store.getState().get('layers').toJS()
+    let activeLayer = _.findIndex(layers, { active: true })
+    if (activeLayer < 0) {
+      activeLayer = 0
+    }
     let value = parseInt(event.target.value, 10)
     socket.emit('synthFilterEnvUpdate', {
       id: clientUUID,
+      layer: activeLayer,
       value,
     })
     this.setState({ filterEnv: value })
