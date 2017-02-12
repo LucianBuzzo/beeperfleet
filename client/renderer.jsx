@@ -9,19 +9,21 @@ const redux = require('redux')
 // TODO: Should be in a shared config
 const SEQUENCE_LENGTH = 16
 
+const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
+
 const CHANGE_MODE = 'CHANGE_MODE'
 const ADD_LAYER = 'ADD_LAYER'
 const ACTIVATE_LAYER = 'ACTIVATE_LAYER'
 const TOGGLE_LAYERS = 'TOGGLE_LAYERS'
 const SEQ_ACTIVE_UPDATE = 'SEQ_ACTIVE_UPDATE'
-const SEQ_VOLUME_UPDATE = 'SEQ_VOLUME_UPDATE'
+const SEQ_GAIN_UPDATE = 'SEQ_GAIN_UPDATE'
 const SEQ_LENGTH_UPDATE = 'SEQ_LENGTH_UPDATE'
 const SEQ_PITCH_UPDATE = 'SEQ_PITCH_UPDATE'
 
 const createSequence = () => [...Array(SEQUENCE_LENGTH)].map(() => ({
   active: false,
-  midiNumber: 60,
-  volume: 0.5,
+  pitch: 60,
+  gain: 0.5,
   length: 100
 }))
 
@@ -60,9 +62,9 @@ const reducer = (state, action) => {
     case SEQ_LENGTH_UPDATE:
       return state.setIn(['layers', action.layer, 'sequence', action.tile, 'length'], action.value)
     case SEQ_PITCH_UPDATE:
-      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'midiNumber'], action.value)
-    case SEQ_VOLUME_UPDATE:
-      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'volume'], action.value)
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'pitch'], action.value)
+    case SEQ_GAIN_UPDATE:
+      return state.setIn(['layers', action.layer, 'sequence', action.tile, 'gain'], action.value)
     default:
       return state
   }
@@ -92,40 +94,82 @@ class Tile extends React.Component {
     this.state = {
       active: false,
       highlight: false,
-      midiNumber: 60,
-      volume: 0.5,
+      pitch: 60,
+      gain: 0.5,
       length: 100
     }
-    this.toggle = this.toggle.bind(this)
-    this.handleChange = this.handleChange.bind(this)
-    this.handleVolumeChange = this.handleVolumeChange.bind(this)
-    this.handleLengthChange = this.handleLengthChange.bind(this)
 
+    this.handleChange = this.handleChange.bind(this)
+  }
+
+  stopIt(e) {
+    e.stopPropagation()
+  }
+
+  handleChange(e, prop) {
+    let value
+    let type
+    switch (prop) {
+      case 'active':
+        value = !this.state.active
+        this.setState(() => ({ active: value}))
+        type = SEQ_ACTIVE_UPDATE
+        break
+      case 'pitch':
+        value = 71 - parseInt(e.target.value, 10)
+        this.setState({ pitch: value})
+        type = SEQ_PITCH_UPDATE
+        break
+      case 'gain':
+        value = (100 - parseInt(e.target.value, 10)) / 100
+        this.setState({ gain: value})
+        type = SEQ_GAIN_UPDATE
+        break
+      case 'length':
+        value = parseInt(e.target.value, 10)
+        this.setState({ length: value })
+        type = SEQ_LENGTH_UPDATE
+        break
+    }
+
+    store.dispatch({
+      type: type,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      value
+    })
+    socket.emit(UPDATE_SEQUENCE, {
+      id: clientUUID,
+      layer: this.props.layer,
+      tile: this.props.sequenceNum,
+      prop,
+      value
+    })
   }
 
   render() {
     return (
-      <button onClick={this.toggle}
+      <button onClick={(e) => this.handleChange(e, 'active')}
         className={"tile " + (this.state.highlight ? 'highlight' : '') + ' ' + (this.state.active ? 'active' : '')}>
         <input
           onClick={this.stopIt}
-          onChange={this.handleChange}
+          onChange={(e) => this.handleChange(e, 'pitch')}
           className="control-slider slider-note"
           type="range"
-          value={71 - this.state.midiNumber}
+          value={71 - this.state.pitch}
           min="0"
           max="23" />
         <input
           onClick={this.stopIt}
-          onChange={this.handleVolumeChange}
+          onChange={(e) => this.handleChange(e, 'gain')}
           className="control-slider slider-volume"
           type="range"
-          value={100 - this.state.volume * 100}
+          value={100 - this.state.gain * 100}
           min="0"
           max="100" />
         <input
           onClick={this.stopIt}
-          onChange={this.handleLengthChange}
+          onChange={(e) => this.handleChange(e, 'length')}
           className="control-slider slider-length"
           type="range"
           min="0"
@@ -134,73 +178,6 @@ class Tile extends React.Component {
     )
   }
 
-  handleLengthChange(e) {
-    let val = parseInt(e.target.value, 10)
-    this.setState({ length: val })
-    store.dispatch({
-      type: SEQ_LENGTH_UPDATE,
-      layer: this.props.layer,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-    socket.emit('sequenceLengthUpdate', {
-      id: clientUUID,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-  }
-
-  handleVolumeChange(e) {
-    let val = (100 - parseInt(e.target.value, 10)) / 100
-    this.setState({ volume: val })
-    store.dispatch({
-      type: SEQ_VOLUME_UPDATE,
-      layer: this.props.layer,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-    socket.emit('sequenceVolumeUpdate', {
-      id: clientUUID,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-  }
-
-  handleChange(e) {
-    let val = 71 - parseInt(e.target.value, 10)
-    this.setState({ midiNumber: val })
-    store.dispatch({
-      type: SEQ_PITCH_UPDATE,
-      layer: this.props.layer,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-    socket.emit('sequenceMidiUpdate', {
-      id: clientUUID,
-      tile: this.props.sequenceNum,
-      value: val
-    })
-  }
-
-  stopIt(e) {
-    e.stopPropagation()
-  }
-
-  toggle() {
-    let active = !this.state.active
-    this.setState(() => ({ active }))
-    store.dispatch({
-      type: SEQ_ACTIVE_UPDATE,
-      layer: this.props.layer,
-      tile: this.props.sequenceNum,
-      value: active
-    })
-    socket.emit('sequenceUpdate', {
-      id: clientUUID,
-      tile: this.props.sequenceNum,
-      value: active
-    })
-  }
 }
 
 class Layer extends React.Component {
@@ -315,14 +292,6 @@ class ToolbarLeft extends React.Component {
           onClick={() => this.setActive('controls')}
           className = {(this.state.activeButton === 'controls' ? 'active' : '')}>
           <i className="fa fa-sliders" aria-hidden="true"></i>
-        </button>
-        <button
-          onClick={() => this.setActive('layers')}
-          className = {(this.state.activeButton === 'layers' ? 'active' : '')}>
-          <i className="fa fa-server" aria-hidden="true"></i>
-        </button>
-        <button onClick={this.addLayer}>
-          <i className="fa fa-plus" aria-hidden="true"></i>
         </button>
       </div>
     )

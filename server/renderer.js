@@ -18,10 +18,7 @@ const BPM = 120
 
 const INITIALISE = 'INITIALISE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
-const REMOVE_SEQUENCE = 'REMOVE_SEQUENCE'
-const UPDATE_SEQUENCE_MIDI = 'UPDATE_SEQUENCE_MIDI'
-const UPDATE_SEQUENCE_VOLUME = 'UPDATE_SEQUENCE_VOLUME'
-const UPDATE_SEQUENCE_LENGTH = 'UPDATE_SEQUENCE_LENGTH'
+const REMOVE_CLIENT = 'REMOVE_CLIENT'
 
 let currentStep = 0
 
@@ -39,29 +36,11 @@ const reducer = (state, action) => {
   switch (action.type) {
     case INITIALISE:
       let { id, layers } = action
-      return state.setIn(['clients', id], layers)
+      return state.setIn(['clients', id], Immutable.fromJS(layers))
     case UPDATE_SEQUENCE:
-      return state.updateIn(['sequences', action.id], (seq) => {
-        seq[action.tile].active = action.value
-        return seq
-      })
-    case UPDATE_SEQUENCE_MIDI:
-      return state.updateIn(['sequences', action.id], (seq) => {
-        seq[action.tile].midiNumber = action.value
-        return seq
-      })
-    case UPDATE_SEQUENCE_VOLUME:
-      return state.updateIn(['sequences', action.id], (seq) => {
-        seq[action.tile].volume = action.value
-        return seq
-      })
-    case UPDATE_SEQUENCE_LENGTH:
-      return state.updateIn(['sequences', action.id], (seq) => {
-        seq[action.tile].length = action.value
-        return seq
-      })
-    case REMOVE_SEQUENCE:
-      return state.deleteIn(['sequences', action.id])
+      return state.setIn(['clients', action.id, action.layer, 'sequence', action.tile, action.prop], action.value)
+    case REMOVE_CLIENT:
+      return state.deleteIn(['clients', action.id])
     default:
       return state
   }
@@ -86,42 +65,14 @@ io.on('connection', (socket) => {
     })
   })
 
-  socket.on('sequenceUpdate', (data) => {
+  socket.on(UPDATE_SEQUENCE, (data) => {
     console.log(data)
     store.dispatch({
       type: UPDATE_SEQUENCE,
       id: data.id,
+      layer: data.layer,
       tile: data.tile,
-      value: data.value
-    })
-  })
-
-  socket.on('sequenceMidiUpdate', (data) => {
-    console.log(data)
-    store.dispatch({
-      type: UPDATE_SEQUENCE_MIDI,
-      id: data.id,
-      tile: data.tile,
-      value: data.value
-    })
-  })
-
-  socket.on('sequenceVolumeUpdate', (data) => {
-    console.log(data)
-    store.dispatch({
-      type: UPDATE_SEQUENCE_VOLUME,
-      id: data.id,
-      tile: data.tile,
-      value: data.value
-    })
-  })
-
-  socket.on('sequenceLengthUpdate', (data) => {
-    console.log(data)
-    store.dispatch({
-      type: UPDATE_SEQUENCE_LENGTH,
-      id: data.id,
-      tile: data.tile,
+      prop: data.prop,
       value: data.value
     })
   })
@@ -145,7 +96,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     store.dispatch({
-      type: REMOVE_SEQUENCE,
+      type: REMOVE_CLIENT,
       id: localUUID
     })
 
@@ -160,18 +111,19 @@ http.listen(8080, () => {
 
 const tick = () => {
   io.sockets.emit('heartbeat', currentStep)
-  console.log(store.getState())
-  let sequences = store.getState().get('sequences').toJS()
+  let clients = store.getState().get('clients').toJS()
 
-  _.forOwn(sequences, (sequence, uuid) => {
-    if (sequence[currentStep].active) {
-      let { midiNumber, volume, length } = sequence[currentStep]
-      // Add the zero to create a new variable instead of a reference
-      midiNumber = midiNumber + 0
-      synthMap[uuid].noteOn(midiNumber, volume)
+  _.forOwn(clients, (layers, uuid) => {
+    layers.forEach((layer) => {
+      if (layer.sequence[currentStep].active) {
+        let { pitch, gain, length } = layer.sequence[currentStep]
+        // Add the zero to create a new variable instead of a reference
+        pitch = pitch + 0
+        synthMap[uuid].noteOn(pitch, gain)
 
-      setTimeout(() => synthMap[uuid].noteOff(midiNumber), length)
-    }
+        setTimeout(() => synthMap[uuid].noteOff(pitch), length)
+      }
+    })
   })
 
   currentStep++
