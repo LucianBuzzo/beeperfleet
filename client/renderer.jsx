@@ -264,12 +264,6 @@ class ToolbarLeft extends React.Component {
       value: mode
     })
   }
-  addLayer() {
-    store.dispatch({
-      type: ADD_LAYER,
-      value: createLayer(store.getState().get('layers').size + 1)
-    })
-  }
   render() {
     return (
       <div className="toolbar toolbar-left">
@@ -305,9 +299,14 @@ class ToolbarRight extends React.Component {
 
   addLayer() {
     console.log('add layer')
+    let layer = createLayer(store.getState().get('layers').size + 1)
     store.dispatch({
       type: ADD_LAYER,
-      value: createLayer(store.getState().get('layers').size + 1)
+      value: layer
+    })
+    socket.emit(ADD_LAYER, {
+      id: clientUUID,
+      value: layer
     })
   }
 

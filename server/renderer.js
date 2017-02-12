@@ -16,6 +16,7 @@ const SEQUENCE_LENGTH = 16
 
 const BPM = 120
 
+const ADD_LAYER = 'ADD_LAYER'
 const INITIALISE = 'INITIALISE'
 const UPDATE_SEQUENCE = 'UPDATE_SEQUENCE'
 const REMOVE_CLIENT = 'REMOVE_CLIENT'
@@ -39,6 +40,8 @@ const reducer = (state, action) => {
       return state.setIn(['clients', id], Immutable.fromJS(layers))
     case UPDATE_SEQUENCE:
       return state.setIn(['clients', action.id, action.layer, 'sequence', action.tile, action.prop], action.value)
+    case ADD_LAYER:
+      return state.updateIn(['clients', action.id], layers => layers.push(Immutable.fromJS(action.value)))
     case REMOVE_CLIENT:
       return state.deleteIn(['clients', action.id])
     default:
@@ -73,6 +76,14 @@ io.on('connection', (socket) => {
       layer: data.layer,
       tile: data.tile,
       prop: data.prop,
+      value: data.value
+    })
+  })
+
+  socket.on(ADD_LAYER, (data) => {
+    store.dispatch({
+      type: ADD_LAYER,
+      id: data.id,
       value: data.value
     })
   })
