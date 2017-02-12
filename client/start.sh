@@ -6,4 +6,4 @@
 # it saves you a LOT of resources avoiding full-desktops envs
 
 rm /tmp/.X0-lock &>/dev/null || true
-startx /usr/src/node_modules/electron/dist/electron /usr/src/client --enable-logging
+startx /usr/src/app/node_modules/electron/dist/electron -r babel-register /usr/src/app/client/main.js --enable-logging

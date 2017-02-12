@@ -1,4 +1,4 @@
-const socket = require('socket.io-client')('http://localhost:8080')
+const socket = require('socket.io-client')('http://192.168.0.14:8080')
 const uuidV4 = require('uuid/v4')
 const clientUUID = uuidV4()
 const React = require('react')
