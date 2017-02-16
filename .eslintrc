@@ -47,8 +47,10 @@
   },
 
   "plugins": [
-    "react"
+    "react",
+    "destructuring"
   ],
+  "extends": ["plugin:destructuring/recommended"],
 
   "rules": {
     ////////// Possible Errors //////////
