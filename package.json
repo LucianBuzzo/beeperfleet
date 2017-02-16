@@ -1,6 +1,6 @@
 {
   "name": "beeperfleet",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A co-op music sequencer",
   "main": "client/main.js",
   "scripts": {
