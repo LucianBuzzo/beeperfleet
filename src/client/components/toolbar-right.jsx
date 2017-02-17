@@ -10,6 +10,12 @@ const {
 class ToolbarRight extends React.Component {
   constructor(props) {
     super(props)
+
+    this.state = { showLayers: false }
+
+    store.subscribe(() => {
+      this.setState({ showLayers: store.getState().get('showLayers') })
+    })
   }
 
   addLayer() {
@@ -36,9 +42,11 @@ class ToolbarRight extends React.Component {
           onClick={this.toggleLayers}>
           <i className="fa fa-server" aria-hidden="true"></i>
         </button>
-        <button onClick={this.addLayer}>
-          <i className="fa fa-plus" aria-hidden="true"></i>
-        </button>
+        {this.state.showLayers &&
+          <button onClick={this.addLayer}>
+            <i className="fa fa-plus" aria-hidden="true"></i>
+          </button>
+        }
       </div>
     )
   }

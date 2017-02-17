@@ -11,7 +11,7 @@ const {
   SEQ_ACTIVE_UPDATE,
   SEQ_GAIN_UPDATE,
   SEQ_LENGTH_UPDATE,
-  SEQ_PITCH_UPDATE
+  SEQ_PITCH_UPDATE,
 } = require('./actions')
 
 
@@ -20,7 +20,7 @@ const reducer = (state, action) => {
     state = Immutable.fromJS({
       mode: 'note',
       layers: [Layer.create()],
-      showLayers: false
+      showLayers: false,
     })
   }
 
