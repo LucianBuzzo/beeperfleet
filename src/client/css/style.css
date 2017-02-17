@@ -13,3 +13,8 @@ body {
   overflow: auto;
   zoom: 1;
 }
+
+.beeper {
+  position: relative;
+  margin-top: 100px;
+}

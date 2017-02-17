@@ -7,3 +7,28 @@
 .controls.active {
   display: block;
 }
+
+.controls__section {
+  margin-bottom: 20px;
+}
+
+.controls__section label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.controls input[type=range] {
+  -webkit-appearance: none;
+  background: #ddd;
+  width: 100%;
+  height: 1px;
+}
+
+.controls input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 8px;
+  height: 30px;
+  background: black;
+}
+
+

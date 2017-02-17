@@ -26,17 +26,17 @@ class ToolbarLeft extends React.Component {
       <div className="toolbar toolbar-left">
         <button
           onClick={() => this.setActive('note')}
-          className = {(this.state.activeButton === 'note' ? 'active' : '')}>
+          className = {'toolbar__button-note ' + (this.state.activeButton === 'note' ? 'active' : '')}>
           <i className="fa fa-music" aria-hidden="true"></i>
         </button>
         <button
           onClick={() => this.setActive('volume')}
-          className = {(this.state.activeButton === 'volume' ? 'active' : '')}>
+          className = {'toolbar__button-volume ' + (this.state.activeButton === 'volume' ? 'active' : '')}>
           <i className="fa fa-volume-up" aria-hidden="true"></i>
         </button>
         <button
           onClick={() => this.setActive('length')}
-          className = {(this.state.activeButton === 'length' ? 'active' : '')}>
+          className = {'toolbar__button-length ' + (this.state.activeButton === 'length' ? 'active' : '')}>
           <i className="fa fa-arrows-h" aria-hidden="true"></i>
         </button>
         <button

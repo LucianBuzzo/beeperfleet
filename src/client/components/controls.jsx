@@ -15,13 +15,6 @@ class Controls extends React.Component {
     }
     this.state = _.assign({ active: false }, activeLayer.synthOptions)
 
-    /*
-      filterCutoff: activeLayer.synthOptions.filterCutoff,
-      filterQ: 7,
-      filterMod: 21,
-      filterEnv: 56,
-    */
-
     store.subscribe(() => {
       let mode = store.getState().get('mode')
       let layers = store.getState().get('layers').toJS()
@@ -86,24 +79,20 @@ class Controls extends React.Component {
     return (
       <div className={"controls " + (this.state.active ? 'active' : '')}>
         <h2>Filter</h2>
-        <div>
-          Cutoff
-          <br />
+        <div className="controls__section">
+          <label>Cutoff</label>
           <input onChange={(e) => this.handleChange(e, 'filterCutoff')} value={this.state.filterCutoff} min="20" max="20000" type="range" />
         </div>
-        <div>
-          Q
-          <br />
+        <div className="controls__section">
+          <label>Q</label>
           <input onChange={(e) => this.handleChange(e, 'filterQ')} value={this.state.filterQ} min="0" max="20" type="range" />
         </div>
-        <div>
-          Mod
-          <br />
+        <div className="controls__section">
+          <label>Mod</label>
           <input onChange={(e) => this.handleChange(e, 'filterMod')} value={this.state.filterMod} min="0" max="100" type="range" />
         </div>
-        <div>
-          Env
-          <br />
+        <div className="controls__section">
+          <label>Env</label>
           <input onChange={(e) => this.handleChange(e, 'filterEnv')} value={this.state.filterEnv} min="0" max="100" type="range" />
         </div>
       </div>

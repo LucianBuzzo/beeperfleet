@@ -19,7 +19,6 @@ class ToolbarRight extends React.Component {
   }
 
   addLayer() {
-    console.log('add layer')
     let layer = Layer.create(store.getState().get('layers').size + 1)
     store.dispatch({
       type: ADD_LAYER,
@@ -39,6 +38,7 @@ class ToolbarRight extends React.Component {
     return (
       <div className="toolbar toolbar-right">
         <button
+          className={(this.state.showLayers ? 'active' : '')}
           onClick={this.toggleLayers}>
           <i className="fa fa-server" aria-hidden="true"></i>
         </button>
