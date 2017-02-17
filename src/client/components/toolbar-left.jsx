@@ -1,9 +1,9 @@
-const { store } = require('./services')
+const { store } = require('../services')
 const React = require('react')
 
 const {
   CHANGE_MODE,
-} = require('./services/actions')
+} = require('../services/actions')
 
 class ToolbarLeft extends React.Component {
   constructor(props) {

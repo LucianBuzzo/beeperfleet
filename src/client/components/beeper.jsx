@@ -1,11 +1,9 @@
 const React = require('react')
 
-const {
-  Controls,
-  Grid,
-  ToolbarLeft,
-  ToolbarRight,
-} = require('./index')
+const Controls = require('./controls')
+const Grid = require('./grid')
+const ToolbarLeft = require('./toolbar-left')
+const ToolbarRight = require('./toolbar-right')
 
 class Beeper extends React.Component {
   render() {

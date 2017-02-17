@@ -1,6 +1,6 @@
 const React = require('react')
-const { store } = require('./services')
-const { Layer } = require('./index')
+const { store } = require('../services')
+const Layer = require('./layer')
 
 class Grid extends React.Component {
   constructor() {

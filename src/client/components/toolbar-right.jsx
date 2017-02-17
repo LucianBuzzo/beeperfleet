@@ -1,11 +1,11 @@
 const React = require('react')
-const { socket, store } = require('./services')
+const { socket, store } = require('../services')
 
-const { Layer } = require('./models')
+const { Layer } = require('../models')
 const {
   ADD_LAYER,
   TOGGLE_LAYERS,
-} = require('./services/actions')
+} = require('../services/actions')
 
 class ToolbarRight extends React.Component {
   constructor(props) {

@@ -1,6 +1,6 @@
 const React = require('react')
 
-const { socket, store } = require('./services')
+const { socket, store } = require('../services')
 
 const {
   UPDATE_SEQUENCE,

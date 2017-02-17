@@ -1,12 +1,12 @@
 const React = require('react')
 const { store } = require('../services')
 
-const { Tile } = require('./index')
+const Tile = require('./tile')
 
 const {
   ACTIVATE_LAYER,
   CHANGE_MODE,
-} = require('./services/actions')
+} = require('../services/actions')
 
 class Layer extends React.Component {
   constructor(props) {

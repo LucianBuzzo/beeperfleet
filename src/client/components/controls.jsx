@@ -1,7 +1,7 @@
 const React = require('react')
 const _ = require('lodash')
 
-const { socket, store } = require('./services')
+const { socket, store } = require('../services')
 
 class Controls extends React.Component {
   constructor(props) {
