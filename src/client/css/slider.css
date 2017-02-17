@@ -20,6 +20,8 @@
   right: -17px;
   transform: rotate(90deg);
   background: none;
+  user-select: none;
+  pointer-events: none;
 }
 
 input[type=range]:focus {
