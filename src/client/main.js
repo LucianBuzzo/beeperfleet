@@ -1,6 +1,8 @@
 const electron = require('electron')
 const { app, BrowserWindow } = electron
 
+app.commandLine.appendSwitch('touch-events', 'enabled')
+
 // simple parameters initialization
 const electronConfig = {
   URL_LAUNCHER_TOUCH: process.env.URL_LAUNCHER_TOUCH === '1' ? 1 : 0,

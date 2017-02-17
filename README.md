@@ -29,6 +29,9 @@ environment variable.
 
 `$ SERVER_ADDRESS=http://192.168.0.6:8080 npm start`
 
+If your deploying to a touch enabled device, set the `TOUCH_ENABLED` environment
+variable to `1`.
+
 ### URL LAUNCHER config via ENV VARS
 
 simply set these [environment varables](http://docs.resin.io/#/pages/management/env-vars.md) in your app via "Environment Variables" panel in the resin dashboard to configure the behaviour of your devices.

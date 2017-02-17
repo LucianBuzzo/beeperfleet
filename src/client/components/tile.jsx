@@ -22,11 +22,26 @@ class Tile extends React.Component {
         highlight: this.props.sequenceNum === step,
       })
     })
+
+    if (process.env.TOUCH_ENABLED === 1) {
+      console.log('TOUCH ENABLED')
+      document.addEventListener('touchmove', this.handleMouseMove, false)
+      document.addEventListener('touchend', this.handleMouseUp, false)
+      this.setState({ touchEnabled: true })
+    } else {
+      console.log('MOUSE ENABLED')
+      document.addEventListener('mousemove', this.handleMouseMove, false)
+      document.addEventListener('mouseup', this.handleMouseUp, false)
+      this.setState({ touchEnabled: false })
+    }
   }
 
   constructor(props) {
     super(props)
     this.state = {
+      touchEnabled: false,
+      mouseDownTime: null,
+      activeSlider: null,
       mode: 'pitch',
       lastPos: {},
       active: false,
@@ -37,8 +52,11 @@ class Tile extends React.Component {
     }
 
     this.handleChange = this.handleChange.bind(this)
-    this.handleDrag = this.handleDrag.bind(this)
-    this.handleDragEnd = this.handleDragEnd.bind(this)
+    this.handleMouseMove = this.handleMouseMove.bind(this)
+    this.handleMouseDown = this.handleMouseDown.bind(this)
+    this.handleMouseUp = this.handleMouseUp.bind(this)
+    this.handleTouchStart = this.handleTouchStart.bind(this)
+    this.handleTouchEnd = this.handleTouchEnd.bind(this)
 
     store.subscribe(() => {
       let mode = store.getState().get('mode')
@@ -90,17 +108,32 @@ class Tile extends React.Component {
     })
   }
 
-  handleDrag(e) {
-    const event = e.nativeEvent
+  handleMouseMove(event) {
     if (!this.state.active) {
       return
     }
+
+    if (!this.state.activeSlider) {
+      return
+    }
+
+    let clientX
+    let clientY
+
+    if (this.state.touchEnabled) {
+      clientX = event.touches[0].clientX
+      clientY = event.touches[0].clientY
+    } else {
+      clientX = event.clientX
+      clientY = event.clientY
+    }
+
     // check to make sure there is data to compare against
     if (typeof this.state.lastPos.x !== 'undefined') {
 
         // get the change from last position to this position
-        let deltaX = this.state.lastPos.x - event.clientX
-        let deltaY = this.state.lastPos.y - event.clientY
+        let deltaX = this.state.lastPos.x - clientX
+        let deltaY = this.state.lastPos.y - clientY
         let update = false
 
         // check which direction had the highest amplitude and then figure out direction by checking if the value is greater or less than zero
@@ -117,10 +150,10 @@ class Tile extends React.Component {
         }
 
         if (update) {
-          let slider = e.target.querySelector('.slider-' + this.state.mode)
+          let slider = this.state.activeSlider
           let val = parseInt(slider.value, 10)
           let ratio = (slider.max - slider.min) / 100
-          slider.value = val - deltaY * ratio * 2
+          slider.value = val - deltaY * ratio * 0.5
           this.handleChange({ target: slider }, slider.dataset.prop)
         }
     }
@@ -128,30 +161,51 @@ class Tile extends React.Component {
     // set the new last position to the current for next time
     this.setState({
       lastPos: {
-        x: event.clientX,
-        y: event.clientY,
+        x: clientX,
+        y: clientY,
       },
     })
   }
 
-  handleDragStart(e) {
-    e.nativeEvent.dataTransfer.effectAllowed = 'move'
-    e.nativeEvent.dataTransfer.setDragImage(dragIcon, 0, 0)
+  handleTouchStart(e) {
+    this.setState({
+      mouseDownTime: Date.now(),
+    })
+    this.setState({
+      activeSlider: e.target.querySelector('.slider-' + this.state.mode),
+    })
   }
 
-  handleDragEnd() {
-    this.setState({ lastPost: {} })
+  handleMouseDown(e) {
+    if (!this.state.touchEnabled) {
+      this.handleTouchStart(e)
+    }
+  }
+
+  handleTouchEnd(e) {
+    if (this.state.mouseDownTime && Date.now() - this.state.mouseDownTime < 250) {
+      this.handleChange(e, 'active')
+    }
+    this.setState({
+      mouseDownTime: null,
+      activeSlider: null,
+      lastPos: {},
+    })
+  }
+
+  handleMouseUp(e) {
+    if (!this.state.touchEnabled) {
+      this.handleTouchEnd(e)
+    }
   }
 
   render() {
     return (
       <button
-        draggable="true"
-        onDrag={this.handleDrag}
-        onDragStart={this.handleDragStart}
-        onDragEnd={this.handleDragEnd}
-        onTouchStart={(e) => this.handleChange(e, 'active')}
-        onClick={(e) => this.handleChange(e, 'active')}
+        onTouchStart={this.handleTouchStart}
+        onMouseDown={this.handleMouseDown}
+        onTouchEnd={this.handleTouchEnd}
+        onMouseUp={this.handleMouseUp}
         className={"tile " + (this.state.highlight ? 'highlight' : '') + ' ' + (this.state.active ? 'active' : '')}>
         <input
           onClick={this.stopIt}
