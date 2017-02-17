@@ -1,8 +1,21 @@
 const electron = require('electron')
-// Module to control application life.
-const app = electron.app
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+const { app, BrowserWindow } = electron
+
+// simple parameters initialization
+const electronConfig = {
+  URL_LAUNCHER_TOUCH: process.env.URL_LAUNCHER_TOUCH === '1' ? 1 : 0,
+  URL_LAUNCHER_TOUCH_SIMULATE: process.env.URL_LAUNCHER_TOUCH_SIMULATE === '1' ? 1 : 0,
+  URL_LAUNCHER_FRAME: process.env.URL_LAUNCHER_FRAME === '1' ? 1 : 0,
+  URL_LAUNCHER_KIOSK: process.env.URL_LAUNCHER_KIOSK === '1' ? 1 : 0,
+  URL_LAUNCHER_NODE: process.env.URL_LAUNCHER_NODE === '1' ? 1 : 0,
+  URL_LAUNCHER_WIDTH: parseInt(process.env.URL_LAUNCHER_WIDTH || 1920, 10),
+  URL_LAUNCHER_HEIGHT: parseInt(process.env.URL_LAUNCHER_HEIGHT || 1080, 10),
+  URL_LAUNCHER_TITLE: process.env.URL_LAUNCHER_TITLE || 'RESIN.IO',
+  URL_LAUNCHER_CONSOLE: process.env.URL_LAUNCHER_CONSOLE === '1' ? 1 : 0,
+  URL_LAUNCHER_URL: process.env.URL_LAUNCHER_URL || 'file:////usr/src/app/data/index.html',
+  URL_LAUNCHER_ZOOM: parseFloat(process.env.URL_LAUNCHER_ZOOM || 1.0),
+  URL_LAUNCHER_OVERLAY_SCROLLBARS: process.env.URL_LAUNCHER_CONSOLE === '1' ? 1 : 0,
+}
 
 const path = require('path')
 const url = require('url')
@@ -13,7 +26,17 @@ let mainWindow
 
 const createWindow = function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
+  mainWindow = new BrowserWindow({
+    width: electronConfig.URL_LAUNCHER_WIDTH,
+    height: electronConfig.URL_LAUNCHER_HEIGHT,
+    frame: !!electronConfig.URL_LAUNCHER_FRAME,
+    title: electronConfig.URL_LAUNCHER_TITLE,
+    kiosk: !!electronConfig.URL_LAUNCHER_KIOSK,
+    webPreferences: {
+      zoomFactor: electronConfig.URL_LAUNCHER_ZOOM,
+      overlayScrollbars: !!electronConfig.URL_LAUNCHER_OVERLAY_SCROLLBARS,
+    },
+  })
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
@@ -22,8 +45,10 @@ const createWindow = function createWindow () {
     slashes: true,
   }))
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  if (electronConfig.URL_LAUNCHER_CONSOLE) {
+    // Open the DevTools.
+    mainWindow.webContents.openDevTools()
+  }
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
