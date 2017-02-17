@@ -11,14 +11,18 @@ const emit = (channel, payload) => {
   socket.emit(channel, data)
 }
 
-socket.on('connect', () => {
+const on = (event, fn) => {
+  socket.on(event, fn)
+}
+
+on('connect', () => {
   console.log('connected')
   emit('initialise', {
-    layers: store.getState().toJS().layers
+    layers: store.getState().toJS().layers,
   })
 })
 
 module.exports = {
   emit,
-  on: socket.on
+  on,
 }
