@@ -6,7 +6,7 @@ const createSequence = () => [...Array(SEQUENCE_LENGTH)].map(() => ({
   active: false,
   pitch: 60,
   gain: 0.5,
-  length: 100
+  length: 100,
 }))
 
 const createLayer = (nameNumber = 1) => ({
@@ -17,15 +17,15 @@ const createLayer = (nameNumber = 1) => ({
     filterCutoff: 256,
     filterQ: 7,
     filterMod: 21,
-    filterEnv: 56
-  }
+    filterEnv: 56,
+  },
 })
 
 module.exports = {
   Layer: {
-    create: createLayer
+    create: createLayer,
   },
   Sequence: {
-    create: createSequence
-  }
+    create: createSequence,
+  },
 }

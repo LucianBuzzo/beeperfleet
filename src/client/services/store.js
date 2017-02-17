@@ -4,6 +4,7 @@ const Immutable = require('immutable')
 const { Layer } = require('../models')
 
 const {
+  UPDATE_SYNTH,
   CHANGE_MODE,
   ADD_LAYER,
   ACTIVATE_LAYER,
@@ -45,6 +46,8 @@ const reducer = (state, action) => {
       return state.setIn(['layers', action.layer, 'sequence', action.tile, 'pitch'], action.value)
     case SEQ_GAIN_UPDATE:
       return state.setIn(['layers', action.layer, 'sequence', action.tile, 'gain'], action.value)
+    case UPDATE_SYNTH:
+      return state.setIn(['layers', action.layer, 'synthOptions', action.prop], action.value)
     default:
       return state
   }

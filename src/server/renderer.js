@@ -31,7 +31,7 @@ ipcRenderer.on('clientConnect', (event, arg) => {
 const reducer = (state, action) => {
   if (!state) {
     state = Immutable.fromJS({
-      clients: {}
+      clients: {},
     })
   }
 
@@ -70,7 +70,7 @@ io.on('connection', (socket) => {
     store.dispatch({
       type: INITIALISE,
       id: data.id,
-      layers: data.layers
+      layers: data.layers,
     })
   })
 
@@ -82,7 +82,7 @@ io.on('connection', (socket) => {
       layer: data.layer,
       tile: data.tile,
       prop: data.prop,
-      value: data.value
+      value: data.value,
     })
   })
 
@@ -91,41 +91,42 @@ io.on('connection', (socket) => {
     store.dispatch({
       type: ADD_LAYER,
       id: data.id,
-      value: data.value
+      value: data.value,
     })
   })
 
   socket.on(UPDATE_SYNTH, (data) => {
-  })
-
-  socket.on('synthFilterCutoffUpdate', (data) => {
-    console.log(data)
-    console.log(synthMap)
-    synthMap[data.id][data.layer].updateFilterCutoff(data.value)
-  })
-  socket.on('synthFilterQUpdate', (data) => {
-    console.log(data)
-    synthMap[data.id][data.layer].updateFilterQ(data.value)
-  })
-  socket.on('synthFilterModUpdate', (data) => {
-    console.log(data)
-    synthMap[data.id][data.layer].updateFilterMod(data.value)
-  })
-  socket.on('synthFilterEnvUpdate', (data) => {
-    console.log(data)
-    synthMap[data.id][data.layer].updateFilterEnv(data.value)
+    switch (data.prop) {
+      case 'filterCutoff':
+        synthMap[data.id][data.layer].updateFilterCutoff(data.value)
+        break
+      case 'filterQ':
+        synthMap[data.id][data.layer].updateFilterQ(data.value)
+        break
+      case 'filterMod':
+        synthMap[data.id][data.layer].updateFilterMod(data.value)
+        break
+      case 'filterEnv':
+        console.log('FILTER ENV')
+        console.log(data)
+        synthMap[data.id][data.layer].updateFilterEnv(data.value)
+        break
+    }
   })
 
   socket.on('disconnect', () => {
     store.dispatch({
       type: REMOVE_CLIENT,
-      id: localUUID
+      id: localUUID,
     })
 
-    for (var i = 0; i < synthMap[localUUID].length; i++) {
-      synthMap[localUUID][i].destroy()
-      delete synthMap[localUUID][i]
-    }
+    // Allow time for notes to be let off
+    setTimeout(() => {
+      for (var i = 0; i < synthMap[localUUID].length; i++) {
+        synthMap[localUUID][i].destroy()
+        delete synthMap[localUUID][i]
+      }
+    }, 10000)
   })
 })
 

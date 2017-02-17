@@ -15,7 +15,6 @@ class Grid extends React.Component {
       let mode = store.getState().get('mode')
       let layers = store.getState().get('layers').toJS()
       let showLayers = store.getState().get('showLayers')
-      console.log(layers)
       this.setState({ mode, layers, showLayers })
       this.forceUpdate()
     })
