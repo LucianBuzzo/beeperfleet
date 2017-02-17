@@ -78,7 +78,6 @@ class Controls extends React.Component {
   render() {
     return (
       <div className={"controls " + (this.state.active ? 'active' : '')}>
-        <h2>Filter</h2>
         <div className="controls__section">
           <label>Cutoff</label>
           <input onChange={(e) => this.handleChange(e, 'filterCutoff')} value={this.state.filterCutoff} min="20" max="20000" type="range" />

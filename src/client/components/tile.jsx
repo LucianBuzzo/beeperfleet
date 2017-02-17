@@ -78,7 +78,9 @@ class Tile extends React.Component {
 
   render() {
     return (
-      <button onClick={(e) => this.handleChange(e, 'active')}
+      <button
+        onTouchStart={(e) => this.handleChange(e, 'active')}
+        onClick={(e) => this.handleChange(e, 'active')}
         className={"tile " + (this.state.highlight ? 'highlight' : '') + ' ' + (this.state.active ? 'active' : '')}>
         <input
           onClick={this.stopIt}
