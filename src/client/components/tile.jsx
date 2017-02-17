@@ -23,7 +23,7 @@ class Tile extends React.Component {
       })
     })
 
-    if (process.env.TOUCH_ENABLED === 1) {
+    if (process.env.TOUCH_ENABLED === '1') {
       console.log('TOUCH ENABLED')
       document.addEventListener('touchmove', this.handleMouseMove, false)
       document.addEventListener('touchend', this.handleMouseUp, false)
