@@ -6,40 +6,21 @@ const React = require('react')
 const ReactDOM = require('react-dom')
 const _ = require('lodash')
 
-const actions = require('./actions')
-const UPDATE_SEQUENCE   = actions.UPDATE_SEQUENCE
-const CHANGE_MODE       = actions.CHANGE_MODE
-const ADD_LAYER         = actions.ADD_LAYER
-const ACTIVATE_LAYER    = actions.ACTIVATE_LAYER
-const TOGGLE_LAYERS     = actions.TOGGLE_LAYERS
-const SEQ_ACTIVE_UPDATE = actions.SEQ_ACTIVE_UPDATE
-const SEQ_GAIN_UPDATE   = actions.SEQ_GAIN_UPDATE
-const SEQ_LENGTH_UPDATE = actions.SEQ_LENGTH_UPDATE
-const SEQ_PITCH_UPDATE  = actions.SEQ_PITCH_UPDATE
+const store = require('./services/store')
 
-// TODO: Should be in a shared config
-const SEQUENCE_LENGTH = 16
+const LayerModel = require('./models').Layer
 
-
-const createSequence = () => [...Array(SEQUENCE_LENGTH)].map(() => ({
-  active: false,
-  pitch: 60,
-  gain: 0.5,
-  length: 100
-}))
-
-const createLayer = (nameNumber = 1) => ({
-  name: 'Layer ' + nameNumber,
-  active: false,
-  sequence: createSequence(),
-  synthOptions: {
-    filterCutoff: 256,
-    filterQ: 7,
-    filterMod: 21,
-    filterEnv: 56
-  }
-})
-
+const {
+  UPDATE_SEQUENCE,
+  CHANGE_MODE,
+  ADD_LAYER,
+  ACTIVATE_LAYER,
+  TOGGLE_LAYERS,
+  SEQ_ACTIVE_UPDATE,
+  SEQ_GAIN_UPDATE,
+  SEQ_LENGTH_UPDATE,
+  SEQ_PITCH_UPDATE
+} = require('./services/actions')
 
 socket.on('connect', () => {
   console.log('connected')
@@ -268,7 +249,7 @@ class ToolbarRight extends React.Component {
 
   addLayer() {
     console.log('add layer')
-    let layer = createLayer(store.getState().get('layers').size + 1)
+    let layer = LayerModel.create(store.getState().get('layers').size + 1)
     store.dispatch({
       type: ADD_LAYER,
       value: layer

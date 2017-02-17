@@ -1,24 +1,25 @@
 const redux = require('redux')
 const Immutable = require('immutable')
 
-const actions = require('./actions')
+const { Layer } = require('../models')
 
-const UPDATE_SEQUENCE   = actions.UPDATE_SEQUENCE
-const CHANGE_MODE       = actions.CHANGE_MODE
-const ADD_LAYER         = actions.ADD_LAYER
-const ACTIVATE_LAYER    = actions.ACTIVATE_LAYER
-const TOGGLE_LAYERS     = actions.TOGGLE_LAYERS
-const SEQ_ACTIVE_UPDATE = actions.SEQ_ACTIVE_UPDATE
-const SEQ_GAIN_UPDATE   = actions.SEQ_GAIN_UPDATE
-const SEQ_LENGTH_UPDATE = actions.SEQ_LENGTH_UPDATE
-const SEQ_PITCH_UPDATE  = actions.SEQ_PITCH_UPDATE
+const {
+  CHANGE_MODE,
+  ADD_LAYER,
+  ACTIVATE_LAYER,
+  TOGGLE_LAYERS,
+  SEQ_ACTIVE_UPDATE,
+  SEQ_GAIN_UPDATE,
+  SEQ_LENGTH_UPDATE,
+  SEQ_PITCH_UPDATE
+} = require('./actions')
 
 
 const reducer = (state, action) => {
   if (!state) {
     state = Immutable.fromJS({
       mode: 'note',
-      layers: [createLayer()],
+      layers: [Layer.create()],
       showLayers: false
     })
   }
