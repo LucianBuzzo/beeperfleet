@@ -12,12 +12,23 @@ set to that tile.
 
 ### Usage
 
+To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+
+```bash
+# Clone this repository
+git clone https://github.com/LucianBuzzo/beeperfleet.git
+# Go into the repository
+cd beeperfleet
+# Install dependencies
+npm install
+```
+
 To start the server app run:  
 
 `$ npm run server`
 
 The server app outputs all the audio for the connected clients, so it
-should be connected to a massive set of speakers/
+should be connected to a massive set of speakers.
 
 To start the client app run:
 
