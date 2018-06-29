@@ -2,6 +2,8 @@
 
 A realtime, cooperative music sequencer using [Electron][electron], [React][react] and [Redux][redux].
 
+![Gif of beeper](/doc/beeperfleet.gif?raw=true)
+
 Client apps running electron will connect to a single server instance via websockets.
 Music is created using a 4 X 4 grid (a sequence), tapping a grid tile will let you
 set the sound on that tile.
