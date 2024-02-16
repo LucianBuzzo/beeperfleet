@@ -11,7 +11,7 @@
   "author": "GitHub",
   "license": "CC0-1.0",
   "dependencies": {
-    "electron": "^26.6.5",
+    "electron": "^26.6.8",
     "electron-rebuild": "^3.2.9",
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
