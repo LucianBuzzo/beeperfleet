@@ -1,4 +1,4 @@
-const uuidV4 = require('uuid/v4')
+const { v4: uuidV4 } = require('uuid')
 const _ = require('lodash')
 const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'http://localhost:8080'
 const socket = require('socket.io-client')(SERVER_ADDRESS)
